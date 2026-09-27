@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/styles.css?v=extraction-ui-v3" />
+    <link rel="stylesheet" href="/static/styles.css?v=20260922" />
   </head>
   <body>
     <div class="page-glow glow-one"></div>
@@ -66,10 +66,10 @@
             <span class="document-icon">⌁</span>
           </div>
 
-          <div class="upload-zone" data-drop-zone="cv">
-            <input id="cv-file" type="file" accept=".txt,.pdf,.docx" hidden />
+          <div class="upload-zone" data-drop-zone="cv" style="cursor: pointer;">
+            <input id="cv-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
             <div class="upload-icon">↑</div>
-            <p><strong>Kéo thả tệp vào đây</strong> hoặc <label for="cv-file">chọn tệp</label></p>
+            <p><strong>Kéo thả tệp vào đây</strong> hoặc <span style="text-decoration: underline;">chọn tệp</span></p>
             <small>PDF có text, Word (.docx), TXT · Tối đa 10MB</small>
             <div class="file-selected" id="cv-file-name" aria-live="polite"></div>
           </div>
@@ -89,10 +89,10 @@
             <span class="document-icon">✦</span>
           </div>
 
-          <div class="upload-zone" data-drop-zone="jd">
-            <input id="jd-file" type="file" accept=".txt,.pdf,.docx" hidden />
+          <div class="upload-zone" data-drop-zone="jd" style="cursor: pointer;">
+            <input id="jd-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
             <div class="upload-icon">↑</div>
-            <p><strong>Kéo thả tệp vào đây</strong> hoặc <label for="jd-file">chọn tệp</label></p>
+            <p><strong>Kéo thả tệp vào đây</strong> hoặc <span style="text-decoration: underline;">chọn tệp</span></p>
             <small>PDF có text, Word (.docx), TXT · Tối đa 10MB</small>
             <div class="file-selected" id="jd-file-name" aria-live="polite"></div>
           </div>
@@ -140,6 +140,6 @@
     </main>
 
     <footer class="shell"><span>TalentLens / NLP matching prototype</span><span>Designed for better hiring decisions</span></footer>
-    <script src="/static/app.js?v=extraction-ui-v3"></script>
+    <script src="/static/app.js?v=20260922"></script>
   </body>
 </html>

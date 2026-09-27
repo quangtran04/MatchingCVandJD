@@ -52,3 +52,4 @@ PROJECTS
 – Performed data preprocessing, feature engineering, model training, and evaluation.
 – Developed a simple interface for users to input vehicle information and receive price predictions.
 – Technologies: Python, Pandas, NumPy, Scikit-learn, Matplotlib, Flask.
+ok

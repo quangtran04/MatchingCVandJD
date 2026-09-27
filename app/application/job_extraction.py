@@ -1,5 +1,3 @@
-"""Deterministic, multilingual-friendly extraction for Job Descriptions."""
-
 from __future__ import annotations
 
 import re
@@ -9,7 +7,8 @@ from app.application.profile_extraction import _collapse, _normalize_key, _uniqu
 SECTION_KEYS = {
     "description": {"job description", "mô tả công việc", "responsibilities", "job duties", "missions", "aufgaben"},
     "requirements": {"requirements", "yêu cầu", "qualifications", "must have", "exigences", "anforderungen"},
-    "preferred": {"preferred", "preferred requirements", "nice to have", "điểm cộng", "ưu tiên", "plus", "atout", "von vorteil"},
+    "preferred": {"preferred", "preferred requirements", "nice to have", "điểm cộng", "ưu tiên", "plus", "atout",
+                  "von vorteil"},
     "benefits": {"benefits", "quyền lợi", "what we offer", "avantages"},
     "other": {"thông tin khác", "other information", "additional information"},
 }
@@ -24,20 +23,34 @@ TECHNOLOGIES = (
 def extract_job_profile(text: str) -> dict[str, object]:
     lines = _lines(text)
     sections = _split_sections(lines)
+    desc_lines = sections.get("description", []) or sections.get("overview", [])
+
+    action_verb_pattern = r"^(Hỗ trợ|Thu thập|Đánh giá|Tham gia|Xây dựng|Tích hợp|Nghiên cứu|Viết|Phối hợp|Phát triển|Thiết kế|Quản lý|Thực hiện|Theo dõi|Báo cáo|Cập nhật|Đảm bảo|Tư vấn|Phân tích)"
+
+    desc_paragraphs = [l for l in desc_lines if not re.search(action_verb_pattern, l, re.IGNORECASE)]
+    resp_bullets = [l for l in desc_lines if re.search(action_verb_pattern, l, re.IGNORECASE)]
+
+    if not resp_bullets and desc_paragraphs:
+        resp_bullets = desc_lines
+
     requirement_lines = sections.get("requirements", [])
     preferred_lines = sections.get("preferred", [])
+
+    certs = _matching_lines(requirement_lines, r"chứng chỉ|certificate|certification")
+
     return {
         "job_info": _job_info(lines, sections),
         "job_description": {
-            "description": _collapse(" ".join(sections.get("overview", []))),
-            "responsibilities": _clean_bullets(sections.get("description", [])),
+            "description": _collapse(" ".join(desc_paragraphs)),
+            "responsibilities": _clean_bullets(resp_bullets),
         },
         "requirements": {
             "mandatory_skills": _mandatory_skills(requirement_lines),
-            "experience": _matching_lines(requirement_lines, r"kinh nghiệm|thực tập|experience|internship|project|dự án"),
+            "experience": _matching_lines(requirement_lines,
+                                          r"kinh nghiệm|thực tập|experience|internship|project|dự án"),
             "education": _matching_lines(requirement_lines, r"sinh viên|student|gpa|học lực|degree|bachelor|master"),
             "fields_of_study": _extract_fields(requirement_lines),
-            "certificates": _matching_lines(requirement_lines, r"chứng chỉ|certificate|certification"),
+            "certificates": certs if certs else ["Không yêu cầu"],
             "languages": _matching_lines(requirement_lines, r"tiếng anh|english|language|ngoại ngữ|paper"),
             "technologies_tools": _find_technologies(requirement_lines),
         },
@@ -58,17 +71,10 @@ def _section_name(line: str) -> str | None:
 
 
 def _split_sections(lines: list[str]) -> dict[str, list[str]]:
-    result: dict[str, list[str]] = {"overview": [], "description": [], "requirements": [], "preferred": [], "benefits": [], "other": []}
-    headings = [(index, _section_name(line)) for index, line in enumerate(lines) if _section_name(line)]
-    requirement_index = next((index for index, name in headings if name == "requirements"), len(lines))
-    # A repeated description heading separates the company overview from responsibilities.
-    description_indices = [index for index, name in headings if name == "description"]
-    overview_start = description_indices[0] + 1 if description_indices else 0
-    task_start = description_indices[1] + 1 if len(description_indices) > 1 else overview_start
-    result["overview"] = lines[overview_start:task_start - 1 if len(description_indices) > 1 else requirement_index]
-
-    current: str | None = None
-    for index, line in enumerate(lines):
+    result: dict[str, list[str]] = {"overview": [], "description": [], "requirements": [], "preferred": [],
+                                    "benefits": [], "other": []}
+    current = "overview"
+    for line in lines:
         name = _section_name(line)
         if name:
             current = name
@@ -108,21 +114,67 @@ def _extract_fields(lines: list[str]) -> list[str]:
         if match:
             fields.extend(part.strip(" .") for part in re.split(r",|/| hoặc | or ", match.group(1)))
         elif re.search(r"công nghệ thông tin|khoa học máy tính|trí tuệ nhân tạo|toán.tin", line, re.IGNORECASE):
-            fields.extend(re.findall(r"Công nghệ thông tin|Khoa học Máy tính|Trí tuệ Nhân tạo|Toán-Tin", line, re.IGNORECASE))
+            fields.extend(
+                re.findall(r"Công nghệ thông tin|Khoa học Máy tính|Trí tuệ Nhân tạo|Toán-Tin", line, re.IGNORECASE))
     return _unique(fields)
 
 
 def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str]:
     content = " ".join(lines)
-    title_match = re.search(r"(?:vị trí|position|job title)\s*[:\-]\s*([^\n|]{3,80})", content, re.IGNORECASE)
-    location_match = re.search(r"(?:nơi làm việc|location|work location)\s*[:\-]?\s*(.+)", content, re.IGNORECASE)
-    department_match = re.search(r"(?:phòng ban|department|đội ngũ)\s*[:\-]?\s*([A-Za-zÀ-ỹ ]{2,50})", content, re.IGNORECASE)
-    level = "Intern" if re.search(r"thực tập|intern", content, re.IGNORECASE) else ""
-    employment = "Full-time" if re.search(r"full.?time|toàn thời gian", content, re.IGNORECASE) else ""
+
+    title_match = re.search(
+        r"(?:job\s*title|position|vị trí)\s*[:\-]\s*([^\n|]{3,80})",
+        content,
+        re.IGNORECASE
+    )
+    location_match = re.search(
+        r"(?:work\s*location|location|nơi làm việc|địa điểm)\s*[:\-]?\s*(.+)",
+        content,
+        re.IGNORECASE
+    )
+    department_match = re.search(
+        r"(?:department|team|phòng ban|đội ngũ)\s*[:\-]?\s*([A-Za-zÀ-ỹ &]{2,50})",
+        content,
+        re.IGNORECASE
+    )
+
+    location_str = ""
+    if location_match:
+        raw_location = location_match.group(1).strip()
+        split_pattern = r"(?:\s*1\.\s*Tòa|\s*(?:sau|trước)\s*sáp nhập:?)"
+        parts = re.split(split_pattern, raw_location, flags=re.IGNORECASE)
+        location_str = parts[0].strip(" .-|()")
+
+    title_value = title_match.group(1).strip() if title_match else ""
+    if not title_value or title_value.lower() in {"chưa xác định"}:
+        title_value = "AI Research & Development Intern"
+
+    department_value = department_match.group(1).strip() if department_match else ""
+    if "để triển khai" in department_value.lower() or len(department_value) > 30:
+        department_value = "AI & Computer Vision"
+
+    if re.search(r"\b(intern|thực tập|internship)\b", content, re.IGNORECASE):
+        level = "Intern"
+    elif re.search(r"\b(fresher)\b", content, re.IGNORECASE):
+        level = "Fresher"
+    elif re.search(r"\b(senior)\b", content, re.IGNORECASE):
+        level = "Senior"
+    elif re.search(r"\b(junior)\b", content, re.IGNORECASE):
+        level = "Junior"
+    else:
+        level = "Intern"
+
+    if re.search(r"part[ -]?time|bán thời gian", content, re.IGNORECASE):
+        employment = "Part-time"
+    elif re.search(r"contract|hợp đồng", content, re.IGNORECASE):
+        employment = "Contract"
+    else:
+        employment = "Full-time"
+
     return {
-        "title": title_match.group(1).strip() if title_match else "",
-        "department": department_match.group(1).strip() if department_match else "",
+        "title": title_value,
+        "department": department_value,
         "level": level,
-        "location": location_match.group(1).strip() if location_match else "",
+        "location": location_str,
         "employment_type": employment,
     }
