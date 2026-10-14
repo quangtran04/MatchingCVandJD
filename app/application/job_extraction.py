@@ -163,6 +163,15 @@ def _lines(text: str) -> list[str]:
     raw_lines = [re.sub(r"\s+", " ", line).strip() for line in text.replace("\r", "").split("\n") if line.strip()]
     expanded: list[str] = []
     for line in raw_lines:
+        heading, separator, content = line.partition(":")
+        if separator and content.strip() and _section_name(heading.strip()):
+            expanded.append(heading.strip())
+            expanded.extend(
+                sentence.strip()
+                for sentence in re.split(r"(?<=[.!?])\s+(?=[A-ZÀ-Ỹ0-9])", content.strip())
+                if sentence.strip()
+            )
+            continue
         match = re.match(r"^(?:Kỹ năng|Yêu cầu kỹ năng)\s*[:\-]?\s*(.*)$", line, re.IGNORECASE)
         if match and match.group(1).strip():
             expanded.append("Kỹ năng")
@@ -303,14 +312,13 @@ def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str
     if not title_value or title_value.lower() in {"chưa xác định"}:
         for line in lines[:5]:
             clean_l = _clean_heading(line)
-            if 5 <= len(clean_l) <= 60 and not _section_name(line):
-                if re.search(
-                    r"\b(intern|thực tập|fresher|junior|senior|lead|manager|kỹ sư|developer|engineer|chuyên viên|nhân viên|analyst)\b",
-                    clean_l,
-                    re.IGNORECASE,
-                ):
-                    title_value = clean_l
-                    break
+            if 5 <= len(clean_l) <= 60 and not _section_name(line) and re.search(
+                r"\b(intern|thực tập|fresher|junior|senior|lead|manager|kỹ sư|developer|engineer|chuyên viên|nhân viên|analyst)\b",
+                clean_l,
+                re.IGNORECASE,
+            ):
+                title_value = clean_l
+                break
         if not title_value or title_value.lower() in {"chưa xác định"}:
             title_value = "AI Research & Development Intern"
 

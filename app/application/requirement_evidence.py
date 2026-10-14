@@ -1,7 +1,7 @@
-"""Evidence-only comparison for JD tasks and nontechnical requirements.
+"""Recognize JD task wording and compare nontechnical requirements with CV evidence.
 
-These signals are intentionally outside the numerical score: CV text can show
-relevant work, but it cannot prove a person's motivation or character.
+Soft requirements stay outside the numerical score: CV text can show relevant
+work, but it cannot prove a person's motivation or character.
 """
 
 from __future__ import annotations
@@ -206,41 +206,4 @@ def compare_other_requirements(cv_profile: dict, jd_profile: dict) -> list[dict[
                     "cv_evidence": evidence["text"] if evidence else "",
                 }
             )
-    return results
-
-
-def compare_responsibilities(cv_profile: dict, jd_profile: dict) -> list[dict[str, str]]:
-    """Find technical overlap in CV projects/experience for JD tasks."""
-    description = jd_profile.get("job_description") or {}
-    cv_sources = [
-        source
-        for source in _cv_sources(cv_profile)
-        if source["section"] in {"Experience", "Projects"}
-    ]
-    results = []
-    for line in description.get("responsibilities", []) or []:
-        jd_skills = skill_mentions(line)
-        if not jd_skills or not TASK_START.search(line):
-            continue
-        evidence = None
-        shared = ""
-        for source in cv_sources:
-            for jd_skill in jd_skills:
-                if any(
-                    match_tier(jd_skill["name"], cv_skill["name"])
-                    for cv_skill in skill_mentions(source["text"])
-                ):
-                    evidence, shared = source, jd_skill["name"]
-                    break
-            if evidence:
-                break
-        results.append(
-            {
-                "jd_text": line,
-                "status": "related" if evidence else "unverified",
-                "shared_skill": shared,
-                "cv_section": evidence["section"] if evidence else "",
-                "cv_evidence": evidence["text"] if evidence else "",
-            }
-        )
     return results

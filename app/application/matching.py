@@ -5,9 +5,9 @@ from __future__ import annotations
 import re
 from datetime import UTC, date, datetime
 
+from app.application.job_alignment import compare_job_description
 from app.application.requirement_evidence import (
     compare_other_requirements,
-    compare_responsibilities,
     extra_kind,
 )
 from app.application.skill_matching import (
@@ -20,8 +20,9 @@ from app.application.skill_matching import (
 )
 
 WEIGHTS = {
-    "skill_match": 0.45,
-    "experience_match": 0.25,
+    "job_fit": 0.40,
+    "skill_match": 0.35,
+    "experience_match": 0.15,
     "education_match": 0.10,
     "project_relevance": 0.0,
 }
@@ -153,6 +154,18 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     """Match extracted profiles; all scores are on a 0–100 scale or N/A."""
     as_of = as_of or datetime.now(UTC).astimezone().date()
     requirements = _as_dict(jd_profile.get("requirements"))
+    responsibility_matches = compare_job_description(cv_profile, jd_profile)
+    job_fit_score = (
+        sum(item["score"] for item in responsibility_matches) / len(responsibility_matches)
+        if responsibility_matches
+        else None
+    )
+    job_fit_reason = (
+        f"{len(responsibility_matches)} nhiệm vụ JD có trọng số ngang nhau; "
+        "đối chiếu kỹ năng, hành động và TF-IDF cosine với Experience/Projects của CV."
+        if responsibility_matches
+        else "JD không có nhiệm vụ công việc đủ rõ để đối chiếu; tiêu chí N/A."
+    )
     required = requirements_from_lines(
         [line for line in _strings(requirements.get("mandatory_skills")) if not extra_kind(line)]
     )
@@ -273,6 +286,12 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     )
 
     scores = {
+        "job_fit": _metric(
+            job_fit_score,
+            WEIGHTS["job_fit"],
+            job_fit_reason,
+            {"tasks": responsibility_matches},
+        ),
         "skill_match": _metric(
             skill_score,
             WEIGHTS["skill_match"],
@@ -354,12 +373,12 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     scores["project_relevance"]["weighted_points"] = applied_bonus_points
     overall = round(base_score + applied_bonus_points, 1) if base_score is not None else None
     other_requirements = compare_other_requirements(cv_profile, jd_profile)
-    responsibility_matches = compare_responsibilities(cv_profile, jd_profile)
     return {
-        "matcher_version": "1.1.0",
+        "matcher_version": "1.2.0",
         "taxonomy_version": taxonomy()["version"],
         "as_of": as_of.isoformat(),
         "scores": scores,
+        "job_fit": scores["job_fit"]["score"],
         "skill_match": scores["skill_match"]["score"],
         "experience_match": scores["experience_match"]["score"],
         "education_match": scores["education_match"]["score"],

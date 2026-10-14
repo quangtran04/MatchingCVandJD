@@ -25,6 +25,7 @@ def profiles(
     education=None,
     jd_education=None,
     fields=None,
+    job_tasks=None,
 ):
     cv = {
         "skills": cv_skills or [],
@@ -40,6 +41,7 @@ def profiles(
             "fields_of_study": fields or [],
         },
         "preferred_requirements": preferred or [],
+        "job_description": {"responsibilities": job_tasks or []},
     }
     return cv, jd
 
@@ -81,6 +83,94 @@ def test_tfidf_cosine_matches_reordered_phrase_without_false_semantics() -> None
     assert match_tier("REST API", "API REST") == ("normalized", 0.9)
     assert match_tier("Machine Learning", "Deep Learning") == ("semantic", 0.8)
     assert match_tier("Data Science", "Data Analytics") is None
+
+
+def test_jd_research_task_gets_partial_credit_from_related_llm_work() -> None:
+    cv, jd = profiles(
+        experience=[
+            {
+                "title": "AI Intern",
+                "details": "Worked with Large Language Models in chatbot systems.",
+            }
+        ],
+        job_tasks=["Nghiên cứu LLM."],
+    )
+    report = match_profiles(cv, jd, as_of=AS_OF)
+    task = report["responsibility_matches"][0]
+    assert task["status"] == "partial"
+    assert 50 <= task["score"] < 80
+    assert task["cv_section"] == "Experience"
+    assert "Large Language Models" in task["cv_evidence"]
+    assert report["scores"]["job_fit"]["score"] == task["score"]
+    assert report["overall_score"] == task["score"]
+
+
+def test_jd_task_prefers_direct_action_and_skill_evidence() -> None:
+    cv, jd = profiles(
+        experience=[
+            {"title": "AI Intern", "details": "Worked with LLMs. Researched LLM prompting methods."}
+        ],
+        job_tasks=["Nghiên cứu LLM.", "Triển khai Docker containers."],
+    )
+    report = match_profiles(cv, jd, as_of=AS_OF)
+    research, deployment = report["responsibility_matches"]
+    assert research["status"] == "strong"
+    assert "Researched" in research["cv_evidence"]
+    assert deployment["status"] == "unverified"
+    assert deployment["score"] == 0
+    assert report["scores"]["job_fit"]["score"] == round(research["score"] / 2, 1)
+
+
+def test_specific_agent_tasks_do_not_get_full_credit_for_general_ai_or_rag() -> None:
+    cv, jd = profiles(
+        experience=[
+            {"title": "AI Intern", "details": "Integrated AI services into web applications."}
+        ],
+        projects=[{"title": "RAG Chatbot", "details": "Built a RAG chatbot with Python."}],
+        job_tasks=[
+            "Tích hợp AI Agent vào sản phẩm.",
+            "Xây dựng pipeline RAG và multi-agent workflow.",
+        ],
+    )
+    tasks = match_profiles(cv, jd, as_of=AS_OF)["responsibility_matches"]
+    assert tasks[0]["status"] == "partial"
+    assert tasks[0]["matched_skills"] == []
+    assert tasks[1]["status"] == "partial"
+    assert any(skill["jd_skill"] == "RAG" for skill in tasks[1]["matched_skills"])
+    assert all(task["score"] < 80 for task in tasks)
+
+
+def test_project_title_supplies_technology_when_details_show_the_action() -> None:
+    cv, jd = profiles(
+        projects=[{"title": "RAG Chatbot", "details": "Built a question answering pipeline."}],
+        job_tasks=["Xây dựng pipeline RAG."],
+    )
+    task = match_profiles(cv, jd, as_of=AS_OF)["responsibility_matches"][0]
+    assert task["status"] == "strong"
+    assert task["cv_section"] == "Projects"
+    assert "RAG Chatbot" in task["cv_evidence"]
+
+
+def test_company_overview_is_not_scored_as_jd_task() -> None:
+    cv, jd = profiles(cv_skills=["Python"])
+    jd["job_description"] = {
+        "description": "We are an AI company in Vietnam.",
+        "responsibilities": ["We are an AI company in Vietnam."],
+    }
+    report = match_profiles(cv, jd, as_of=AS_OF)
+    assert report["responsibility_matches"] == []
+    assert report["scores"]["job_fit"]["score"] is None
+
+
+def test_inline_jd_description_heading_keeps_the_task_for_scoring() -> None:
+    jd = extract_job_profile("Mô tả công việc: Nghiên cứu LLM.\nYêu cầu: Python")
+    assert jd["job_description"]["responsibilities"] == ["Nghiên cứu LLM."]
+    cv, _ = profiles(
+        experience=[{"title": "AI Intern", "details": "Worked with LLMs in chatbot systems."}]
+    )
+    report = match_profiles(cv, jd, as_of=AS_OF)
+    assert report["scores"]["job_fit"]["score"] is not None
+    assert report["responsibility_matches"][0]["status"] == "partial"
 
 
 def test_match_report_exposes_cosine_and_matching_method() -> None:
@@ -129,14 +219,15 @@ def test_weighted_score_and_traceable_evidence() -> None:
     )
     report = match_profiles(cv, jd, as_of=AS_OF)
     assert {key: item["score"] for key, item in report["scores"].items()} == {
+        "job_fit": None,
         "skill_match": 87.5,
         "experience_match": 50.0,
         "education_match": 100.0,
         "project_relevance": 50.0,
     }
-    assert report["base_score"] == 77.3
+    assert report["base_score"] == 80.2
     assert report["project_bonus_points"] == 5
-    assert report["overall_score"] == 82.3
+    assert report["overall_score"] == 85.2
     assert report["skill_match"] == 87.5
     assert report["experience_match"] == 50.0
     assert report["scores"]["experience_match"]["evidence"]["cv_years"] == 2
@@ -282,7 +373,7 @@ Có tư duy logic, chủ động học hỏi và tinh thần trách nhiệm cao.
     report = match_profiles(cv, jd, as_of=AS_OF)
     assert jd["requirements"]["mandatory_skills"] == ["Python"]
     assert len(report["responsibility_matches"]) == 1
-    assert report["responsibility_matches"][0]["status"] == "related"
+    assert report["responsibility_matches"][0]["status"] == "strong"
     signals = {item["jd_text"]: item for item in report["other_requirements"]}
     assert signals["Yêu thích công nghệ, AI"]["status"] == "evidence"
     assert signals["mong muốn phát triển sự nghiệp lập trình"]["status"] == "evidence"

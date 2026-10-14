@@ -261,6 +261,38 @@ function reportSection(id, number, title, subtitle, metric, matched, missing, so
   </article>`;
 }
 
+function reportRoleSection(metric, tasks) {
+  const score = metric.score;
+  const rows = tasks.map((task, index) => {
+    const label = task.status === 'strong' ? 'Phù hợp rõ' : task.status === 'partial' ? 'Phù hợp một phần' : 'Chưa có bằng chứng';
+    const note = task.matched_skills.length
+      ? `Kỹ năng liên quan: ${task.matched_skills.map((item) => `${item.jd_skill} ↔ ${item.cv_skill}`).join(', ')}`
+      : task.shared_actions.length ? 'Nội dung và cách thực hiện có điểm chung.' : '';
+    const evidence = task.cv_evidence
+      ? `<p class='report-task-evidence'><b>CV · ${escapeHtml(task.cv_section)}</b> ${escapeHtml(task.cv_evidence)}</p>`
+      : `<p class='report-task-evidence is-empty'>Chưa tìm thấy kinh nghiệm hoặc dự án đủ liên quan trong CV.</p>`;
+    return `<li class='report-task report-task-${task.status}'>
+      <div class='report-task-heading'><span class='report-task-index'>${String(index + 1).padStart(2, '0')}</span><p>${escapeHtml(task.jd_text)}</p>
+        <span class='report-task-status'>${label}</span><strong class='report-task-score'>${formatScore(task.score)}</strong></div>
+      ${evidence}${note ? `<p class='report-task-note'>${escapeHtml(note)}</p>` : ''}
+    </li>`;
+  }).join('');
+  return `<article class='report-section report-role-section' id='report-role'>
+    <div class='report-section-top'><span class='report-section-number'>01</span>
+      <div class='report-section-title'><h4>Mô tả công việc</h4><p>Từng nhiệm vụ trong JD được đối chiếu với kinh nghiệm và dự án của CV.</p></div>
+      <strong class='report-section-score ${score == null ? 'is-na' : ''}'>${formatScore(score)}</strong>
+    </div>
+    ${score == null ? `<div class='report-unavailable'>${escapeHtml(metric.reason)}</div>` : `<ol class='report-task-list'>${rows}</ol>`}
+    <details class='report-calculation'><summary>Xem cách tính &amp; bằng chứng</summary>
+      <div class='report-calculation-body'><p>${escapeHtml(metric.reason)}</p>
+        <p>Điểm nhiệm vụ = 60% kỹ năng liên quan + 30% hành động tương ứng + 10% TF-IDF cosine. Các nhiệm vụ không nêu kỹ năng dùng hành động và nội dung chung. Điểm mục này là trung bình các nhiệm vụ.</p>
+        <p>Trọng số áp dụng: <b>${score == null ? 'N/A' : formatScore(metric.effective_weight * 100)}</b> · Đóng góp: <b>${metric.weighted_points.toLocaleString('vi-VN', { maximumFractionDigits: 2 })} điểm</b></p>
+        ${tasks.filter((task) => task.cv_evidence).map((task) => reportSource(`JD · ${task.jd_text}`, `CV · ${task.cv_section}: ${task.cv_evidence}`)).join('')}
+      </div>
+    </details>
+  </article>`;
+}
+
 function reportEvidenceSection(items) {
   if (!items.length) return '';
   const supported = items.filter((item) => item.status !== 'unverified').map((item) => ({
@@ -275,8 +307,8 @@ function reportEvidenceSection(items) {
   }));
   return `<article class='report-section' id='report-other'>
     <div class='report-section-top'>
-      <span class='report-section-number'>04</span>
-      <div class='report-section-title'><h4>Công việc & yêu cầu khác</h4><p>Đối chiếu nhiệm vụ, động lực, cách làm việc và điểm ưu tiên với bằng chứng CV.</p></div>
+      <span class='report-section-number'>05</span>
+      <div class='report-section-title'><h4>Tư duy & điểm ưu tiên khác</h4><p>Đối chiếu động lực, cách làm việc và điểm ưu tiên với bằng chứng CV.</p></div>
       <strong class='report-section-score is-na is-label'>Không chấm điểm</strong>
     </div>
     <div class='report-columns'>
@@ -307,11 +339,14 @@ function renderMatch(report) {
   $('#score-ring').style.setProperty('--score', `${overall ?? 0}%`);
   $('#overall-value').textContent = overall == null ? 'N/A' : overall.toLocaleString('vi-VN', { maximumFractionDigits: 1 });
   $('#overall-unit').textContent = overall == null ? '' : '%';
-  $('#overall-title').textContent = overall == null ? 'Chưa đủ dữ liệu' : 'Kết quả đánh giá';
-  const active = ['skill_match', 'experience_match', 'education_match'].filter((key) => scores[key].score != null).length;
-  $('#overall-summary').textContent = `${active}/3 tiêu chí có dữ liệu · Điểm nền ${formatScore(report.base_score)}. Điểm chỉ hỗ trợ người đánh giá.`;
+  $('#overall-title').textContent = overall == null ? 'Chưa đủ dữ liệu' : 'Phù hợp với JD';
+  const active = ['job_fit', 'skill_match', 'experience_match', 'education_match'].filter((key) => scores[key].score != null).length;
+  $('#overall-summary').textContent = `${active}/4 tiêu chí JD có dữ liệu · Điểm nền ${formatScore(report.base_score)}. Điểm chỉ hỗ trợ người đánh giá.`;
 
+  const tasks = report.responsibility_matches || [];
+  const supportedTasks = tasks.filter((task) => task.status !== 'unverified').length;
   const overview = [
+    { key: 'job_fit', id: 'report-role', title: 'Mô tả công việc', note: tasks.length ? `${supportedTasks}/${tasks.length} nhiệm vụ có bằng chứng` : 'JD chưa nêu nhiệm vụ rõ' },
     { key: 'skill_match', id: 'report-skills', title: 'Kỹ năng', note: `${skillMatches.length}/${required.length + preferred.length} yêu cầu` },
     { key: 'experience_match', id: 'report-experience', title: 'Kinh nghiệm', note: experience.jd_required_years == null ? 'JD không nêu số năm' : `Yêu cầu ${experience.jd_required_years} năm` },
     { key: 'education_match', id: 'report-education', title: 'Học vấn', note: (education.jd_degree || (education.jd_fields || []).length) ? 'Học vị & ngành học' : 'JD không nêu yêu cầu' },
@@ -391,18 +426,16 @@ function renderMatch(report) {
     (education.field_match ? eduFound : eduMissing).push(item);
   }
 
-  const otherItems = [
-    ...(report.responsibility_matches || []),
-    ...(report.other_requirements || []),
-  ];
+  const otherItems = report.other_requirements || [];
 
   $('#report-sections').innerHTML = [
-    reportSection('report-skills', '01', 'Kỹ năng', 'Đối chiếu yêu cầu bắt buộc và ưu tiên với skill CV.', scores.skill_match, skillFound, skillMissing, skillSources, 'JD không nêu kỹ năng để đối chiếu.'),
-    reportSection('report-experience', '02', 'Kinh nghiệm', 'So sánh số năm có bằng chứng trong CV với mức JD yêu cầu.', scores.experience_match, expFound, expMissing, [
+    reportRoleSection(scores.job_fit, tasks),
+    reportSection('report-skills', '02', 'Kỹ năng ứng viên', 'Đối chiếu yêu cầu bắt buộc và ưu tiên của JD với skill CV.', scores.skill_match, skillFound, skillMissing, skillSources, 'JD không nêu kỹ năng để đối chiếu.'),
+    reportSection('report-experience', '03', 'Số năm kinh nghiệm', 'So sánh số năm có bằng chứng trong CV với mức JD yêu cầu.', scores.experience_match, expFound, expMissing, [
       { label: 'JD · số năm yêu cầu', text: experience.jd_text },
       ...(experience.cv_entries || []).map((text) => ({ label: 'CV · kinh nghiệm', text })),
     ], scores.experience_match.reason),
-    reportSection('report-education', '03', 'Học vấn', 'Đối chiếu học vị và ngành học.', scores.education_match, eduFound, eduMissing, [
+    reportSection('report-education', '04', 'Học vấn', 'Đối chiếu học vị và ngành học JD yêu cầu.', scores.education_match, eduFound, eduMissing, [
       ...(education.jd_text || []).map((text) => ({ label: 'JD · học vấn', text })),
       ...(education.cv_entries || []).map((text) => ({ label: 'CV · học vấn', text })),
     ], scores.education_match.reason),

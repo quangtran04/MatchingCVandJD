@@ -29,7 +29,7 @@ Người dùng tải/dán CV và JD, thấy text đã trích xuất ở hai khun
 - CV/JD đã trích xuất: `summary`, `skills`, `experience`, `education`, `projects`, `certificates`, `languages` (trường không có thì trả mảng rỗng/null).
 - JD có `required_skills`, `preferred_skills`, `minimum_years_experience`, `education_requirements`.
 - Kỹ năng match được phân loại `exact`, `normalized`, `semantic`; kèm cặp từ và điểm tin cậy.
-- `skill_match`, `experience_match`, `education_match`, `project_relevance` và `overall_score` trong thang 0–100; `project_bonus_points` là điểm cộng 0–10.
+- `job_fit`, `skill_match`, `experience_match`, `education_match`, `project_relevance` và `overall_score` trong thang 0–100; `project_bonus_points` là điểm cộng 0–10.
 - Danh sách `matched_skills`, `missing_required_skills`, và lý do tính điểm.
 
 ## Giai đoạn 0 — Dữ liệu và tiêu chí đánh giá (1–2 ngày)
@@ -37,7 +37,7 @@ Người dùng tải/dán CV và JD, thấy text đã trích xuất ở hai khun
 - Tạo tối thiểu 15–20 cặp CV/JD tiếng Việt hoặc Anh đã ẩn danh/tự tạo.
 - Gán nhãn thủ công: skills CV, skills bắt buộc/ưu tiên của JD, số năm kinh nghiệm, học vấn và score kỳ vọng.
 - Tạo `skill_taxonomy.json`: canonical skill, aliases và nhóm skill. Ví dụ `JavaScript: [JS, Javascript]`.
-- Chốt weights ban đầu: Skill 45%, Experience 25%, Education 10%, Project relevance 20%.
+- Trọng số hiện tại: nhiệm vụ trong mô tả công việc 40%, Skill 35%, Experience 15%, Education 10%; Project relevance chỉ tạo điểm cộng tối đa 10.
 
 **Done when:** Có bảng test case với kết quả kỳ vọng; không dùng CV thật trong Git.
 
@@ -71,6 +71,7 @@ Thứ tự matching cho từng skill của JD; một skill CV chỉ tính cho m�
 | 2. Normalized Match | Cùng canonical sau alias/chuẩn hoá, hoặc đủ gần về từ vựng | `JS` ↔ `JavaScript` | `skill_taxonomy.json` + token hóa, TF-IDF cosine và RapidFuzz khi cần |
 | 3. Semantic Match | Khác từ nhưng cùng/ngần nghĩa | `Relational Database` ↔ `PostgreSQL` | Mapping thủ công theo nhóm skill; embedding là phần nâng cao |
 
+- Tính `job_fit`: đối chiếu từng nhiệm vụ trong mô tả công việc của JD với câu có bằng chứng trong Experience/Projects của CV; kết hợp kỹ năng, hành động và TF-IDF cosine, hiển thị phù hợp rõ/một phần/chưa có bằng chứng. Điểm là trung bình các nhiệm vụ.
 - Tính `skill_match`: required skills có trọng số cao hơn preferred skills.
 - Tính `experience_match`: `min(cv_years / jd_required_years, 1) × 100`; JD không nêu số năm thì đánh dấu N/A và phân phối lại trọng số.
 - Tính `education_match`: exact/normalized degree-field match; nếu JD không yêu cầu thì N/A.
@@ -78,14 +79,14 @@ Thứ tự matching cho từng skill của JD; một skill CV chỉ tính cho m�
 - Overall mặc định: chuẩn hoá trọng số các tiêu chí chính có dữ liệu, sau đó cộng tối đa 10 điểm từ dự án và chặn ở 100.
 
 ```text
-base = weighted_average(skill × 0.45, experience × 0.25, education × 0.10)
+base = weighted_average(job_fit × 0.40, skill × 0.35, experience × 0.15, education × 0.10)
 project_bonus = 10 × project_skills_matched / jd_skills_total
 overall = min(100, base + project_bonus)
 ```
 
-Chỉ tính lại trọng số của các tiêu chí chính có dữ liệu. Nếu thiếu skill bắt buộc, luôn hiện warning; không tự động kết luận loại ứng viên. Nhiệm vụ trong mô tả công việc và yêu cầu mềm/ưu tiên được đối chiếu với bằng chứng CV, hiển thị trạng thái có bằng chứng hoặc cần xác minh thêm, không đưa vào điểm số.
+Chỉ tính lại trọng số của các tiêu chí chính có dữ liệu. Nếu thiếu skill bắt buộc, luôn hiện warning; không tự động kết luận loại ứng viên. Nhiệm vụ trong mô tả công việc có điểm và bằng chứng riêng. Yêu cầu về động lực, cách làm việc và điểm ưu tiên không phải kỹ năng chỉ được hiển thị bằng chứng hoặc cần xác minh thêm, không đưa vào điểm số.
 
-**Done when:** Kết quả hiển thị điểm kỹ năng, kinh nghiệm, học vấn, điểm cộng dự án và overall; từng con số có thể truy ngược về dữ liệu đầu vào. Yêu cầu mềm hiện bằng chứng hoặc cần xác minh thêm, không làm giảm điểm.
+**Done when:** Kết quả hiển thị điểm từng nhiệm vụ JD, điểm kỹ năng, kinh nghiệm, học vấn, điểm cộng dự án và overall; từng con số có thể truy ngược về dữ liệu đầu vào. Yêu cầu mềm hiện bằng chứng hoặc cần xác minh thêm, không làm giảm điểm.
 
 ## Giai đoạn 4 — Giao diện, kiểm thử và báo cáo (2–3 ngày)
 

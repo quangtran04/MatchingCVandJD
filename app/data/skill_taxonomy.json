@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "skills": {
     "Java": ["Java"],
     "JavaScript": ["JavaScript", "Javascript", "JS"],
@@ -21,6 +21,9 @@
     "Natural Language Processing": ["Natural Language Processing", "NLP", "Xử lý ngôn ngữ tự nhiên"],
     "Computer Vision": ["Computer Vision", "CV", "Thị giác máy tính"],
     "Large Language Models": ["Large Language Models", "Large Language Model", "LLMs", "LLM"],
+    "AI Agent": ["AI Agent", "AI Agents", "AI-Agent", "Agentic AI"],
+    "Multi-Agent": ["Multi-Agent", "Multi Agent", "Multi-Agent Workflow", "Multi Agent Workflow"],
+    "Tool Use": ["Tool Use", "Tool-Use", "Function Calling"],
     "Retrieval-Augmented Generation": ["Retrieval-Augmented Generation", "RAG"],
     "Convolutional Neural Networks": ["Convolutional Neural Networks", "CNN"],
     "Transformer": ["Transformer", "Transformers"],
