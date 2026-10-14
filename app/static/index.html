@@ -10,7 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/styles.css?v=20260922" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261010-nlp" />
+    <link rel="stylesheet" href="/static/match-report.css?v=20261010-evidence" />
   </head>
   <body>
     <div class="page-glow glow-one"></div>
@@ -125,21 +126,28 @@
       </section>
 
       <section id="match-result" class="stage-view results-section hidden" aria-live="polite">
-        <div class="result-heading"><div><p class="section-label">BƯỚC 03 · MATCHING REPORT</p><h2>Mức độ phù hợp</h2></div><div class="result-actions"><span class="status-tag">● Đã phân tích</span><button class="text-button" id="back-to-extraction">← Xem thông tin trích xuất</button></div></div>
-        <div class="match-layout">
-          <article class="overall-card"><p class="mini-label">OVERALL MATCH</p><div class="score-ring"><strong>81</strong><span>%</span></div><h3>Phù hợp tốt</h3><p>Ứng viên đáp ứng phần lớn yêu cầu cốt lõi của vị trí.</p></article>
-          <div class="metric-list">
-            <div class="metric"><span>Skill match</span><div class="bar"><i style="--value: 85%"></i></div><b>85%</b></div>
-            <div class="metric"><span>Experience match</span><div class="bar"><i style="--value: 70%"></i></div><b>70%</b></div>
-            <div class="metric"><span>Education match</span><div class="bar"><i style="--value: 100%"></i></div><b>100%</b></div>
-            <div class="metric"><span>Project relevance</span><div class="bar"><i style="--value: 80%"></i></div><b>80%</b></div>
-          </div>
-          <article class="match-details"><p class="mini-label">MATCHING INSIGHTS</p><p><span class="check">✓</span> Python — Exact match</p><p><span class="check">✓</span> PostgreSQL — Semantic match với SQL</p><p><span class="missing">!</span> Thiếu kỹ năng AWS</p></article>
+        <div class="result-heading">
+          <div><p class="section-label">BƯỚC 03 · KẾT QUẢ ĐÁNH GIÁ</p><h2>Mức độ phù hợp</h2></div>
+          <div class="result-actions"><span class="status-tag">● Đã phân tích</span><button class="text-button" id="back-to-extraction">← Xem thông tin trích xuất</button></div>
         </div>
+        <div class="report-overview">
+          <article class="report-overall">
+            <div><p class="report-eyebrow">ĐIỂM TỔNG HỢP</p><h3 id="overall-title">Chưa đánh giá</h3><p id="overall-summary"></p></div>
+            <div class="report-ring" id="score-ring"><strong id="overall-value">—</strong><span id="overall-unit"></span></div>
+          </article>
+          <nav class="report-score-grid" id="metric-list" aria-label="Điểm theo tiêu chí"></nav>
+        </div>
+        <div class="report-warning" id="report-warning" role="status" hidden></div>
+        <details class="report-bonus" id="project-bonus" hidden>
+          <summary><strong id="project-bonus-value"></strong><span id="project-bonus-summary"></span><em>Xem bằng chứng</em></summary>
+          <div class="report-bonus-evidence" id="project-bonus-evidence"></div>
+        </details>
+        <div class="report-section-heading"><div><p class="section-label">CHI TIẾT THEO TIÊU CHÍ</p><h3>Đã khớp và cần xem xét</h3></div><p>Nhấn “Xem cách tính & bằng chứng” để kiểm tra dữ liệu nguồn.</p></div>
+        <div class="report-sections" id="report-sections"></div>
       </section>
     </main>
 
     <footer class="shell"><span>TalentLens / NLP matching prototype</span><span>Designed for better hiring decisions</span></footer>
-    <script src="/static/app.js?v=20260922"></script>
+    <script src="/static/app.js?v=20261010-evidence"></script>
   </body>
 </html>

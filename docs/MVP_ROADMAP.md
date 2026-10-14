@@ -29,7 +29,7 @@ Người dùng tải/dán CV và JD, thấy text đã trích xuất ở hai khun
 - CV/JD đã trích xuất: `summary`, `skills`, `experience`, `education`, `projects`, `certificates`, `languages` (trường không có thì trả mảng rỗng/null).
 - JD có `required_skills`, `preferred_skills`, `minimum_years_experience`, `education_requirements`.
 - Kỹ năng match được phân loại `exact`, `normalized`, `semantic`; kèm cặp từ và điểm tin cậy.
-- `skill_match`, `experience_match`, `education_match`, `project_relevance` và `overall_score` trong thang 0–100.
+- `skill_match`, `experience_match`, `education_match`, `project_relevance` và `overall_score` trong thang 0–100; `project_bonus_points` là điểm cộng 0–10.
 - Danh sách `matched_skills`, `missing_required_skills`, và lý do tính điểm.
 
 ## Giai đoạn 0 — Dữ liệu và tiêu chí đánh giá (1–2 ngày)
@@ -68,23 +68,24 @@ Thứ tự matching cho từng skill của JD; một skill CV chỉ tính cho m�
 | Tầng | Điều kiện | Ví dụ | Cách làm MVP |
 | --- | --- | --- | --- |
 | 1. Exact Match | Chuỗi canonical giống nhau | `Java` ↔ `Java` | So sánh sau lowercase/trim |
-| 2. Normalized Match | Cùng canonical sau alias/chuẩn hoá | `JS` ↔ `JavaScript` | `skill_taxonomy.json` + RapidFuzz khi cần |
+| 2. Normalized Match | Cùng canonical sau alias/chuẩn hoá, hoặc đủ gần về từ vựng | `JS` ↔ `JavaScript` | `skill_taxonomy.json` + token hóa, TF-IDF cosine và RapidFuzz khi cần |
 | 3. Semantic Match | Khác từ nhưng cùng/ngần nghĩa | `Relational Database` ↔ `PostgreSQL` | Mapping thủ công theo nhóm skill; embedding là phần nâng cao |
 
 - Tính `skill_match`: required skills có trọng số cao hơn preferred skills.
 - Tính `experience_match`: `min(cv_years / jd_required_years, 1) × 100`; JD không nêu số năm thì đánh dấu N/A và phân phối lại trọng số.
 - Tính `education_match`: exact/normalized degree-field match; nếu JD không yêu cầu thì N/A.
-- Tính `project_relevance`: tỷ lệ JD skills xuất hiện trong phần project của CV; không chấm bằng toàn bộ CV.
-- Overall mặc định:
+- Tính `project_relevance`: tỷ lệ JD skills xuất hiện trong phần project của CV; chỉ dùng làm điểm cộng, không trừ điểm khi thiếu dự án.
+- Overall mặc định: chuẩn hoá trọng số các tiêu chí chính có dữ liệu, sau đó cộng tối đa 10 điểm từ dự án và chặn ở 100.
 
 ```text
-overall = 0.45 × skill + 0.25 × experience
-        + 0.10 × education + 0.20 × project_relevance
+base = weighted_average(skill × 0.45, experience × 0.25, education × 0.10)
+project_bonus = 10 × project_skills_matched / jd_skills_total
+overall = min(100, base + project_bonus)
 ```
 
-Chỉ tính lại trọng số của các tiêu chí có dữ liệu. Nếu thiếu skill bắt buộc, luôn hiện warning; không tự động kết luận loại ứng viên.
+Chỉ tính lại trọng số của các tiêu chí chính có dữ liệu. Nếu thiếu skill bắt buộc, luôn hiện warning; không tự động kết luận loại ứng viên. Nhiệm vụ trong mô tả công việc và yêu cầu mềm/ưu tiên được đối chiếu với bằng chứng CV, hiển thị trạng thái có bằng chứng hoặc cần xác minh thêm, không đưa vào điểm số.
 
-**Done when:** Kết quả hiển thị tương tự: `Skill 85%`, `Experience 70%`, `Education 100%`, `Project relevance 80%`, `Overall 81%` và có thể truy ngược mỗi con số về dữ liệu đầu vào.
+**Done when:** Kết quả hiển thị điểm kỹ năng, kinh nghiệm, học vấn, điểm cộng dự án và overall; từng con số có thể truy ngược về dữ liệu đầu vào. Yêu cầu mềm hiện bằng chứng hoặc cần xác minh thêm, không làm giảm điểm.
 
 ## Giai đoạn 4 — Giao diện, kiểm thử và báo cáo (2–3 ngày)
 

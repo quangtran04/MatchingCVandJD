@@ -12,6 +12,8 @@ import unicodedata
 from collections.abc import Iterable
 from itertools import pairwise
 
+from app.application.nlp_text import tokenize
+
 SECTION_ALIASES = {
     "summary": {
         "summary", "profile", "professional summary", "about me", "objective", "resume", "resumen",
@@ -129,7 +131,14 @@ def _extract_skills(section: str) -> list[str]:
                 continue
             if item and len(item) > 1 and not _is_skill_heading(item):
                 skills.append(item)
-    return _unique(skills)
+    seen: set[tuple[str, ...]] = set()
+    unique_skills = []
+    for skill in skills:
+        key = tuple(tokenize(skill))
+        if key and key not in seen:
+            unique_skills.append(skill)
+            seen.add(key)
+    return unique_skills
 
 
 def _is_skill_heading(value: str) -> bool:

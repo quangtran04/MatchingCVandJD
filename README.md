@@ -57,7 +57,7 @@ Luồng xử lý MVP: `upload/dán text → kiểm tra tệp → trích raw text
 | DB | PostgreSQL + SQLAlchemy + Alembic | Dữ liệu quan hệ, truy vết phiên bản kết quả |
 | Đọc tài liệu | PyMuPDF | Trích text từ digital PDF |
 | OCR (sau MVP) | Tesseract/pytesseract | Cần thiết nếu muốn ảnh/PDF scan → text |
-| NLP | spaCy + RapidFuzz | Chuẩn hoá và so khớp có giải thích được |
+| NLP | Token hóa Unicode + TF-IDF cosine + RapidFuzz; spaCy cho mở rộng | Chuẩn hoá và so khớp có giải thích được |
 | Semantic matching (giai đoạn 2) | sentence-transformers | Bổ sung ngữ nghĩa, không thay thế luật |
 | Queue (khi cần) | Redis + Celery | Tách OCR/LLM dài khỏi request HTTP |
 | Test/quality | pytest, ruff, mypy | Giữ chất lượng khi mở rộng |
@@ -66,23 +66,11 @@ Không nên gọi LLM trực tiếp trong router. Nếu dùng LLM, chỉ dùng �
 
 ## Khởi động
 
-Yêu cầu: Python 3.11+, Docker Desktop (nếu chạy PostgreSQL qua Docker). Tesseract chỉ cần khi bật OCR cho CV scan.
-
-```bash
-python -m venv .venv
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
-Copy-Item .env.example .env
-#docker compose up -d db
-uvicorn app.main:app --reload
-```
-
-Sau khi scaffold API hoàn chỉnh, tài liệu tương tác sẽ ở `http://localhost:8000/docs`.
+Xem hướng dẫn từng bước ở mục [Cách chạy project](#cách-chạy-project) cuối README.
 
 ## Nguyên tắc scoring
 
-Điểm phải cấu hình được theo vị trí, mặc định: kỹ năng bắt buộc 45%, kinh nghiệm 30%, kỹ năng ưu tiên 15%, học vấn/chứng chỉ/ngôn ngữ 10%. Một yêu cầu bắt buộc không đạt sẽ được đánh dấu `blocker`; không nên âm thầm bù bằng điểm từ tiêu chí khác. Mỗi điểm cần trả về `evidence` (đoạn text/trường CV nguồn), `confidence` và `matcher_version`.
+Điểm nền dùng kỹ năng 45%, kinh nghiệm 25% và học vấn 10%, rồi chuẩn hoá lại trọng số của các tiêu chí có dữ liệu. Kỹ năng bắt buộc được tính gấp đôi kỹ năng ưu tiên trong điểm kỹ năng. Dự án chỉ cộng tối đa 10 điểm; kỹ năng bắt buộc thiếu được cảnh báo, không tự động loại ứng viên. Mỗi kết quả cần có bằng chứng từ CV/JD và phiên bản thuật toán để kiểm tra lại.
 
 ## Bảo mật & dữ liệu cá nhân
 
@@ -92,3 +80,42 @@ Sau khi scaffold API hoàn chỉnh, tài liệu tương tác sẽ ở `http://lo
 - Kiểm thử với dữ liệu tổng hợp/đã ẩn danh.
 
 Chi tiết triển khai theo giai đoạn ở [docs/MVP_ROADMAP.md](docs/MVP_ROADMAP.md) và các quyết định kiến trúc ở [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Cách chạy project
+
+Yêu cầu **Python 3.11 trở lên**. Mở PowerShell tại thư mục gốc của project (thư mục chứa `pyproject.toml`), rồi chạy:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+```
+
+Sau khi server khởi động, mở:
+
+- Giao diện: <http://127.0.0.1:8000/>
+- Tài liệu API (Swagger): <http://127.0.0.1:8000/docs>
+- Kiểm tra server: <http://127.0.0.1:8000/health> (trả về `{"status":"ok"}`)
+
+Trên giao diện, dán nội dung CV và JD, hoặc tải hai tệp TXT, DOCX hay PDF có lớp text (tối đa 10 MB mỗi tệp). Nếu tải tệp, bấm **Trích xuất văn bản** trước và kiểm tra/chỉnh sửa nội dung trong hai ô nhập. Sau đó bấm **Trích xuất thông tin** để xem dữ liệu CV/JD, rồi bấm **Đánh giá phù hợp** để xem điểm ba tiêu chí chính, điểm cộng dự án, các mục có bằng chứng/cần xác minh và nguồn tính điểm. Có thể dùng `tests/textcv.txt` và `tests/testjd.txt` để thử. Tiêu chí JD không có dữ liệu định lượng được hiển thị `N/A` và trọng số được phân bổ lại cho các tiêu chí còn lại.
+
+Phiên bản hiện tại chạy trực tiếp, không cần tạo `.env` hoặc khởi động PostgreSQL. Dừng server bằng `Ctrl+C`. Muốn chạy kiểm thử:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+```
+
+### Matching và cách tính điểm
+
+Nút **Đánh giá phù hợp** gọi `POST /api/match` với JSON `{"cv_text":"...","jd_text":"..."}`. API trích xuất lại CV/JD từ văn bản hiện tại rồi trả về `matched_skills`, `missing_required_skills`, `scores`, `overall_score` và bằng chứng nguồn. Có thể thử trực tiếp trong Swagger ở `/docs`.
+
+- Skill: khớp `exact` (100%), `normalized` bằng alias, TF-IDF cosine hoặc RapidFuzz (tối đa 95%), rồi `semantic` theo mapping có kiểm soát (80%). Một skill CV chỉ được gán cho một yêu cầu JD; yêu cầu bắt buộc có trọng số gấp đôi yêu cầu ưu tiên. Hai lựa chọn nối bằng “or/hoặc” được tính là một yêu cầu.
+- Experience: `min(số năm CV / số năm JD, 1) × 100`; các khoảng thời gian làm việc trùng nhau chỉ được tính một lần. JD không nêu số năm hoặc CV có kinh nghiệm nhưng không thể định lượng thì hiển thị N/A.
+- Education: so học vị tối thiểu và ngành học (kể cả alias tiếng Việt/Anh); JD không có yêu cầu tương ứng thì N/A.
+- Project relevance: số yêu cầu skill JD xuất hiện trong **Projects** của CV chia cho tổng số yêu cầu skill JD; chỉ tạo điểm cộng, không lấy skill từ phần khác của CV.
+
+`base_score` được tính từ Skill 45%, Experience 25% và Education 10%; tiêu chí N/A được bỏ qua rồi chuẩn hoá lại trọng số còn lại. Kỹ năng JD có bằng chứng trong mục Projects của CV tạo **điểm cộng tối đa 10 điểm**: `project_bonus_points = 10 × số kỹ năng JD có trong Projects / tổng số kỹ năng JD`. `overall_score = min(100, base_score + project_bonus_points)`; không có dự án phù hợp thì không bị trừ điểm. `project_relevance` vẫn là tỷ lệ tham khảo, không có trọng số trong điểm nền. Các skill bắt buộc còn thiếu luôn hiện cảnh báo; điểm số không tự động loại ứng viên. Taxonomy và ánh xạ semantic nằm trong `app/data/skill_taxonomy.json` để có thể kiểm tra/chỉnh sửa.
+
+Các nhiệm vụ có công nghệ nhận diện được trong phần mô tả công việc được đối chiếu với Experience/Projects của CV. Yêu cầu về động lực, cách làm việc, dự án/cuộc thi và công cụ AI hỗ trợ lập trình được ghi nhận theo **bằng chứng cụ thể** hoặc **cần xác minh thêm**. Các tín hiệu này không chấm điểm; sự vắng mặt trong CV không được suy ra là ứng viên thiếu phẩm chất. Ví dụ, chỉ ghi nhận công cụ AI hỗ trợ lập trình khi CV nêu Copilot/Cursor hoặc nêu rõ ChatGPT/Claude được dùng để viết mã.
+
+**NLP đang sử dụng:** văn bản CV/JD được tách mục; các cụm skill được chuẩn hóa Unicode và tách token (giữ nguyên `C#`, `C++`). Khi matching tên skill, hệ thống tạo hai vector TF-IDF: một theo token, một theo n-gram ký tự dài 3–4; lấy điểm cosine cao hơn. Với `tf = 1 + log(số lần xuất hiện)` và `idf = log((N + 1)/(df + 1)) + 1`, điểm cosine từ `0` đến `1` được dùng cho tầng normalized khi đạt ngưỡng `0.82`. API trả `cosine_similarity` và `match_method` cho từng cặp để kiểm tra. TF-IDF cosine đo mức giống **từ vựng**, không phải độ gần nghĩa đã học từ dữ liệu; ví dụ `Relational Database` ↔ `PostgreSQL` vẫn do taxonomy semantic quyết định. Dự án chưa tải/chạy mô hình embedding huấn luyện sẵn, nên có thể chạy offline. Tách token tiếng Việt hiện dựa trên ranh giới ký tự/khoảng trắng, chưa dùng mô hình tách từ tiếng Việt.

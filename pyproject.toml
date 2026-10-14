@@ -35,6 +35,9 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.setuptools.package-data]
+"app.data" = ["*.json"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 100

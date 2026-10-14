@@ -1,4 +1,4 @@
-"""FastAPI entry point. Routers are added as use-cases are implemented."""
+"""FastAPI entry point for document, extraction, and matching endpoints."""
 
 from pathlib import Path
 
@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.application.job_extraction import extract_job_profile
+from app.application.matching import match_profiles
 from app.application.profile_extraction import extract_cv_profile
 from app.application.text_extraction import TextExtractionError, extract_text
 
@@ -68,6 +69,18 @@ def create_app() -> FastAPI:
             "cv_profile": extract_cv_profile(request.cv_text),
             "jd_profile": extract_job_profile(request.jd_text),
         }
+
+    @app.post("/api/match", tags=["matching"])
+    async def match_information(request: InformationExtractionRequest) -> dict[str, object]:
+        """Extract both profiles and return an evidence-backed matching report."""
+        if not request.cv_text.strip() or not request.jd_text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "MISSING_INPUT", "message": "CV và JD đều phải có văn bản."},
+            )
+        cv_profile = extract_cv_profile(request.cv_text)
+        jd_profile = extract_job_profile(request.jd_text)
+        return match_profiles(cv_profile, jd_profile)
 
     return app
 
