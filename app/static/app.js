@@ -1,9 +1,11 @@
 const $ = (selector) => document.querySelector(selector);
 const selectedFiles = { cv: null, jd: null };
+const invalidKinds = new Set();
 const extractedRawTexts = { cv: "", jd: "" };
 const maxFileSize = 10 * 1024 * 1024;
 let extractedProfiles = null;
 let lastMatchReport = null;
+let currentExtractionSource = "cv";
 
 function updateCount(kind) {
   const node = $(`#${kind}-text`);
@@ -21,7 +23,11 @@ function getEffectiveText(kind) {
 }
 
 function rawTextReady() {
-  return getEffectiveText("cv").length > 0 && getEffectiveText("jd").length > 0;
+  return (
+    getEffectiveText("cv").length > 0 &&
+    getEffectiveText("jd").length > 0 &&
+    invalidKinds.size === 0
+  );
 }
 
 function setStep(stage) {
@@ -74,6 +80,7 @@ function showFileMessage(kind, message, isError = false) {
 function selectFile(kind, file) {
   if (!file) return;
   invalidateAnalysis();
+  invalidKinds.delete(kind);
   extractedRawTexts[kind] = "";
   const textArea = $(`#${kind}-text`);
   if (textArea) textArea.value = "";
@@ -90,6 +97,42 @@ function selectFile(kind, file) {
   syncPipeline();
 }
 
+function apiError(body, fallback) {
+  const detail = body?.detail || {};
+  const error = new Error(detail.message || body?.message || fallback);
+  if (detail.code === "INVALID_DOCUMENT") error.invalidFields = detail.errors || [];
+  return error;
+}
+
+// Trả true nếu lỗi là "tài liệu không hợp lệ" và đã báo cho người dùng ở đúng ô nhập.
+function reportInvalidDocument(error) {
+  if (!error?.invalidFields?.length) return false;
+  showStage(1);
+  ["cv", "jd"].forEach((kind) => {
+    const item = error.invalidFields.find((e) => e.field === kind);
+    if (item) {
+      showFileMessage(kind, `✗ ${item.message}`, true);
+    } else if (selectedFiles[kind]) {
+      showFileMessage(kind, `✓ Đã chọn: ${selectedFiles[kind].name}`);
+    }
+  });
+  const firstKind = error.invalidFields[0].field;
+  $(`#${firstKind}-file-name`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  return true;
+}
+
+async function validateKind(kind) {
+  const text = getEffectiveText(kind);
+  if (!text) return;
+  const response = await fetch("/api/validate-document", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ kind, text }),
+  });
+  const body = await response.json();
+  if (!response.ok) throw apiError(body, "Không thể kiểm tra loại tài liệu.");
+}
+
 async function extractFile(kind, file) {
   showFileMessage(kind, `◌ Đang trích xuất văn bản: ${file.name}`);
   const formData = new FormData();
@@ -102,12 +145,14 @@ async function extractFile(kind, file) {
     throw new Error(body.detail?.message || body.message || "Không thể trích xuất nội dung từ tệp.");
   }
 
+  // Văn bản trích xuất chỉ lưu trong bộ nhớ, không đưa xuống khung textarea.
   extractedRawTexts[kind] = body.text ?? body.content ?? "";
-  const textArea = $(`#${kind}-text`);
-  if (textArea) textArea.value = extractedRawTexts[kind];
 
   updateCount(kind);
-  showFileMessage(kind, `✓ Đã trích xuất văn bản ${body.method ? `· ${body.method}` : ""}`);
+  showFileMessage(
+    kind,
+    `✓ Đã trích xuất: ${file.name} · ${extractedRawTexts[kind].length.toLocaleString("vi-VN")} ký tự${body.method ? ` · ${body.method}` : ""}`
+  );
 }
 
 function escapeHtml(value) {
@@ -193,6 +238,23 @@ function formatEntryDetails(detailsText) {
   return `${paragraphsHtml}${techChips}`;
 }
 
+// Chia các thẻ vào hai cột sao cho chiều cao cân bằng: thẻ kế tiếp luôn vào cột đang ngắn hơn.
+// Cần gọi khi vùng chứa đang hiển thị để đo được chiều cao thật.
+function balanceColumns(layout) {
+  if (!layout) return;
+  const cards = Array.from(layout.children);
+  const narrow = window.matchMedia("(max-width: 960px)").matches;
+  const colA = document.createElement("div");
+  const colB = document.createElement("div");
+  colA.className = "balanced-col";
+  colB.className = "balanced-col";
+  layout.replaceChildren(colA, colB);
+  cards.forEach((card) => {
+    if (narrow || colA.offsetHeight <= colB.offsetHeight) colA.appendChild(card);
+    else colB.appendChild(card);
+  });
+}
+
 function renderEntries(entries, emptyText = "Chưa tìm thấy thông tin trong hồ sơ.") {
   if (!entries?.length) {
     return `<div class="empty-state-box"><span>—</span><p class="empty-value">${escapeHtml(emptyText)}</p></div>`;
@@ -223,6 +285,38 @@ function renderEntries(entries, emptyText = "Chưa tìm thấy thông tin trong 
           ${formatEntryDetails(entry.details)}
         </div>
       </div>`;
+    })
+    .join("")}</div>`;
+}
+
+// Danh sách thu gọn: chỉ hiện tiêu đề + ngày, bấm vào để xem chi tiết.
+function renderCollapsibleEntries(entries, emptyText = "Chưa tìm thấy thông tin trong hồ sơ.") {
+  if (!entries?.length) {
+    return `<div class="empty-state-box"><span>—</span><p class="empty-value">${escapeHtml(emptyText)}</p></div>`;
+  }
+  return `<div class="field-list">${entries
+    .map((entry, idx) => {
+      const rawTitle = String(entry.title || "").trim();
+      const titleParts = rawTitle.split(/\s*\|\s*/).filter(Boolean);
+      const mainTitle = titleParts[0] || rawTitle;
+
+      return `<details class="field-entry entry-collapsible">
+        <summary class="entry-summary">
+          <div class="field-entry-top">
+            <div class="field-entry-heading">
+              <span class="entry-index">${String(idx + 1).padStart(2, "0")}</span>
+              <b>${escapeHtml(mainTitle)}</b>
+            </div>
+            <div class="entry-summary-side">
+              ${entry.date ? `<time>${escapeHtml(entry.date)}</time>` : ""}
+              <span class="entry-chevron" aria-hidden="true"></span>
+            </div>
+          </div>
+        </summary>
+        <div class="field-entry-content">
+          ${formatEntryDetails(entry.details)}
+        </div>
+      </details>`;
     })
     .join("")}</div>`;
 }
@@ -311,16 +405,9 @@ function renderProfile(profile) {
   container.innerHTML = `
     ${candidateHero}
     <div class="cv-structured-layout">
-      <div class="cv-col-sidebar">
         ${fieldCard("SKILLS", "Kỹ năng chuyên môn & cá nhân", renderList(profile.skills, true), "", skillsCount)}
         ${fieldCard("EDUCATION", "Học vấn", renderEntries(profile.education), "", eduCount)}
-        <div class="cv-subgrid-two">
-          ${fieldCard("LANGUAGES", "Ngoại ngữ", renderList(profile.languages))}
-          ${fieldCard("CERTIFICATES", "Chứng chỉ", renderList(profile.certificates, false, "Không yêu cầu / Chưa cập nhật"))}
-        </div>
-      </div>
-      <div class="cv-col-main">
-        ${fieldCard("PROJECTS", "Dự án tiêu biểu", renderEntries(profile.projects), "", projectsCount)}
+        ${fieldCard("PROJECTS", "Dự án tiêu biểu", renderCollapsibleEntries(profile.projects), "", projectsCount)}
         ${fieldCard(
           "EXPERIENCE",
           "Kinh nghiệm làm việc",
@@ -328,9 +415,16 @@ function renderProfile(profile) {
           "",
           expCount
         )}
-      </div>
+        ${fieldCard("LANGUAGES", "Ngoại ngữ", renderList(profile.languages))}
+        ${fieldCard(
+          "CERTIFICATES",
+          "Chứng chỉ",
+          renderList(profile.certificates, false, "Không yêu cầu / Chưa cập nhật")
+        )}
     </div>
   `;
+
+  balanceColumns(container.querySelector(".cv-structured-layout"));
 }
 
 function requirementGroup(label, values, tags = false, emptyText = "Chưa đề cập") {
@@ -395,16 +489,21 @@ function renderJobProfile(profile) {
     ? `${profile.preferred_requirements.length} mục`
     : "";
 
-  const requirementBody = `<div class="req-groups-grid">
+  // Backend trả về ["Không yêu cầu"] khi JD không nêu chứng chỉ -> coi như chưa đề cập.
+  const jdCertificates = (requirements.certificates || []).filter(
+    (item) => !/^\s*không yêu cầu\s*\.?\s*$/i.test(String(item))
+  );
+
+  const requirementCards = `
     ${requirementGroup("Kỹ năng bắt buộc", requirements.mandatory_skills)}
     ${requirementGroup("Công nghệ & Công cụ nhận diện", requirements.technologies_tools, true)}
     ${requirementGroup("Kinh nghiệm yêu cầu", requirements.experience)}
     ${requirementGroup("Trình độ học vấn", requirements.education)}
     ${requirementGroup("Chuyên ngành liên quan", requirements.fields_of_study, true)}
     ${requirementGroup("Ngoại ngữ", requirements.languages)}
-    ${requirementGroup("Chứng chỉ", requirements.certificates, false, "Không yêu cầu")}
+    ${requirementGroup("Chứng chỉ", jdCertificates)}
     ${requirementGroup("Yêu cầu khác", requirements.other_requirements)}
-  </div>`;
+  `;
 
   const container = $("#extraction-fields");
   if (!container) return;
@@ -412,7 +511,6 @@ function renderJobProfile(profile) {
   container.innerHTML = `
     ${jdHero}
     <div class="jd-structured-layout">
-      <div class="jd-col-left">
         ${fieldCard(
           "RESPONSIBILITIES",
           "Nhiệm vụ & Trách nhiệm công việc",
@@ -427,12 +525,11 @@ function renderJobProfile(profile) {
           "",
           prefCount
         )}
-      </div>
-      <div class="jd-col-right">
-        ${fieldCard("REQUIREMENTS", "Chi tiết yêu cầu ứng viên", requirementBody)}
-      </div>
+        ${requirementCards}
     </div>
   `;
+
+  balanceColumns(container.querySelector(".jd-structured-layout"));
 }
 
 function formatScore(value) {
@@ -800,6 +897,7 @@ function renderMatch(report) {
 }
 
 function setExtractionTab(source) {
+  currentExtractionSource = source;
   document.querySelectorAll(".extraction-tab").forEach((tab) => {
     const active = tab.dataset.source === source;
     tab.classList.toggle("active", active);
@@ -817,6 +915,7 @@ function setExtractionTab(source) {
 
   if (textArea) {
     textArea.addEventListener("input", () => {
+      invalidKinds.delete(kind);
       invalidateAnalysis();
       updateCount(kind);
       syncPipeline();
@@ -871,24 +970,63 @@ if (extractBtn) {
     const button = event.currentTarget;
     const sources = ["cv", "jd"].filter((kind) => selectedFiles[kind]);
 
-    if (!sources.length) {
-      if (!rawTextReady()) {
-        ["cv", "jd"]
-          .filter((kind) => !getEffectiveText(kind))
-          .forEach((kind) => showFileMessage(kind, "Hãy tải tệp hoặc dán nội dung trước.", true));
-      } else {
-        button.innerHTML = "<span>✓</span> Văn bản đã sẵn sàng <b>→</b>";
+    // Chưa có file thì chỉ cần có văn bản dán; ô nào trống thì báo ngay.
+    const empty = ["cv", "jd"].filter((kind) => !selectedFiles[kind] && !getEffectiveText(kind));
+    if (empty.length) {
+      empty.forEach((kind) => showFileMessage(kind, "Hãy tải tệp hoặc dán nội dung trước.", true));
+      if (!sources.length && empty.length === 2) {
+        syncPipeline();
+        return;
       }
-      syncPipeline();
-      return;
     }
 
     button.classList.add("loading");
-    button.innerHTML = "<span>◌</span> Đang trích xuất văn bản…";
+    invalidKinds.clear();
+    invalidateAnalysis();
 
     try {
-      await Promise.all(sources.map((kind) => extractFile(kind, selectedFiles[kind])));
-      button.innerHTML = "<span>✓</span> Đã trích xuất văn bản <b>→</b>";
+      // Bước 1: đọc văn bản từ tệp (nếu có).
+      if (sources.length) {
+        button.innerHTML = "<span>◌</span> Đang trích xuất văn bản…";
+        await Promise.all(sources.map((kind) => extractFile(kind, selectedFiles[kind])));
+      }
+
+      // Bước 2: kiểm tra văn bản (từ tệp hoặc dán) có đúng là CV / JD không.
+      button.innerHTML = "<span>◌</span> Đang kiểm tra CV / JD…";
+      const kinds = ["cv", "jd"].filter((kind) => getEffectiveText(kind));
+      const results = await Promise.allSettled(kinds.map((kind) => validateKind(kind)));
+
+      const failures = [];
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") return;
+        const kind = kinds[index];
+        const reason = result.reason;
+        if (reason?.invalidFields?.length) {
+          invalidKinds.add(kind);
+          failures.push({ kind, message: reason.invalidFields[0].message });
+        } else {
+          throw reason;
+        }
+      });
+
+      kinds.forEach((kind) => {
+        const failure = failures.find((item) => item.kind === kind);
+        if (failure) {
+          showFileMessage(kind, `✗ ${failure.message}`, true);
+        } else if (selectedFiles[kind]) {
+          const length = extractedRawTexts[kind].length.toLocaleString("vi-VN");
+          showFileMessage(kind, `✓ ${selectedFiles[kind].name} · ${length} ký tự · đúng định dạng ${kind.toUpperCase()}`);
+        } else {
+          showFileMessage(kind, `✓ Nội dung đúng định dạng ${kind.toUpperCase()}`);
+        }
+      });
+
+      if (failures.length) {
+        button.innerHTML = "<span>!</span> Tài liệu không hợp lệ";
+        $(`#${failures[0].kind}-file-name`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        button.innerHTML = "<span>✓</span> Đã trích xuất & kiểm tra <b>→</b>";
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
       sources.forEach((kind) => showFileMessage(kind, message, true));
@@ -916,11 +1054,12 @@ if (infoExtractBtn) {
         }),
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.detail?.message || "Không thể trích xuất thông tin.");
+      if (!response.ok) throw apiError(body, "Không thể trích xuất thông tin.");
 
       extractedProfiles = body;
-      setExtractionTab("cv");
+      // Hiện bước 2 trước rồi mới vẽ thẻ, để đo chiều cao và cân bằng hai cột chính xác.
       showStage(2);
+      setExtractionTab("cv");
 
       const matchBtn = $("#pipeline-match-button");
       if (matchBtn) {
@@ -931,9 +1070,13 @@ if (infoExtractBtn) {
       button.innerHTML = "<span>✓</span> Đã trích xuất";
       $("#extraction-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
-      button.innerHTML = "<span>!</span> Trích xuất lỗi";
-      window.alert(message);
+      if (reportInvalidDocument(error)) {
+        button.innerHTML = "<span>!</span> Tài liệu không hợp lệ";
+      } else {
+        const message = error instanceof Error ? error.message : "Đã có lỗi xảy ra.";
+        button.innerHTML = "<span>!</span> Trích xuất lỗi";
+        window.alert(message);
+      }
     } finally {
       button.classList.remove("loading");
     }
@@ -957,14 +1100,18 @@ if (pipelineMatchBtn) {
         body: JSON.stringify({ cv_text: getEffectiveText("cv"), jd_text: getEffectiveText("jd") }),
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.detail?.message || "Không thể đánh giá mức độ phù hợp.");
+      if (!response.ok) throw apiError(body, "Không thể đánh giá mức độ phù hợp.");
       renderMatch(body);
       showStage(3);
       button.innerHTML = "<span>✓</span> Đã đánh giá";
       $("#match-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-      button.innerHTML = "<span>!</span> Đánh giá lỗi";
-      window.alert(error instanceof Error ? error.message : "Đã có lỗi xảy ra.");
+      if (reportInvalidDocument(error)) {
+        button.innerHTML = "<span>!</span> Tài liệu không hợp lệ";
+      } else {
+        button.innerHTML = "<span>!</span> Đánh giá lỗi";
+        window.alert(error instanceof Error ? error.message : "Đã có lỗi xảy ra.");
+      }
     } finally {
       button.classList.remove("loading");
     }
@@ -992,6 +1139,16 @@ $("#go-to-match")?.addEventListener("click", () => {
   } else if (extractedProfiles) {
     $("#pipeline-match-button")?.click();
   }
+});
+
+// Cân bằng lại hai cột khi màn hình đổi giữa bố cục 1 cột và 2 cột.
+let lastNarrow = window.matchMedia("(max-width: 960px)").matches;
+window.addEventListener("resize", () => {
+  const narrow = window.matchMedia("(max-width: 960px)").matches;
+  if (narrow === lastNarrow) return;
+  lastNarrow = narrow;
+  const visible = !$("#extraction-result")?.classList.contains("hidden");
+  if (extractedProfiles && visible) setExtractionTab(currentExtractionSource);
 });
 
 syncPipeline();

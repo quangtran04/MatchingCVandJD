@@ -103,7 +103,7 @@ def extract_job_profile(text: str) -> dict[str, object]:
     return {
         "job_info": _job_info(lines, sections),
         "job_description": {
-            "description": _collapse(" ".join(desc_paragraphs)),
+            "description": _format_description(desc_paragraphs),
             "responsibilities": _clean_bullets(resp_bullets),
         },
         "requirements": {
@@ -123,12 +123,42 @@ def extract_job_profile(text: str) -> dict[str, object]:
             "certificates": certs if certs else ["Không yêu cầu"],
             "languages": _matching_lines(
                 requirement_lines,
-                r"tiếng anh|english|tiếng nhật|tiếng trung|tiếng hàn|ngoại ngữ|foreign language|ielts|toeic|toefl|language|paper",
+                r"tiếng anh|english|tiếng nhật|tiếng trung|tiếng hàn|tiếng pháp|tiếng đức|ngoại ngữ|foreign language|ielts|toeic|toefl|jlpt|hsk|topik",
             ),
             "technologies_tools": _find_technologies(lines),
         },
         "preferred_requirements": _clean_bullets(preferred_lines),
     }
+
+
+def _format_description(paragraphs: list[str]) -> str:
+    """Ghép phần mô tả tổng quan, mỗi ý đánh số (1. 2. 3.) nằm trên một dòng riêng."""
+    items: list[str] = []
+    pending = ""
+    for paragraph in paragraphs:
+        text = _collapse(paragraph)
+        if not text:
+            continue
+
+        # Số thứ tự bị tách riêng thành một dòng ("1.") -> ghép với dòng kế tiếp.
+        if re.fullmatch(r"\d+[.)]", text):
+            pending = text
+            continue
+        if pending:
+            text = f"{pending} {text}"
+            pending = ""
+
+        # Tách các mục đánh số nằm chung một dòng: "1. A: 2. B 3. C".
+        numbered = len(re.findall(r"(?:^|\s)\d+[.)]\s+\S", text))
+        if numbered >= 2 or re.match(r"^\d+[.)]\s", text):
+            parts = re.split(r"\s+(?=\d+[.)]\s+\S)", text)
+            items.extend(part.strip(" :;") for part in parts if part.strip(" :;"))
+        else:
+            items.append(text)
+
+    if pending:
+        items.append(pending)
+    return "\n".join(items)
 
 
 def _clean_heading(line: str) -> str:
