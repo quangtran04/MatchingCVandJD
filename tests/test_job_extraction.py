@@ -34,3 +34,23 @@ Nắm nền tảng ML/LLM: hiểu cách LLM hoạt động.
     assert "Python" in profile["requirements"]["technologies_tools"]
     assert len(profile["requirements"]["languages"]) > 0
 
+
+def test_excludes_numbered_subsection_headings_from_skill_and_preferred_lists() -> None:
+    sample = """
+Yêu cầu ứng viên
+1. Kiến thức nền tảng
+- Có kiến thức cơ bản về Python, Machine Learning/Deep Learning, Transformer và LLM.
+- Hiểu nguyên lý hoạt động của RAG, Embedding, Vector Database và các phương pháp Fine-tuning LLM cơ bản.
+2. Điểm cộng
+- Đã từng thực hiện project cá nhân liên quan đến RAG hoặc Fine-tuning LLM.
+3. Tư duy và khả năng làm việc
+- Có tư duy phân tích, giải quyết vấn đề và khả năng tự học, nghiên cứu công nghệ mới.
+"""
+    profile = extract_job_profile(sample)
+
+    assert "1. Kiến thức nền tảng" not in profile["requirements"]["mandatory_skills"]
+    assert len(profile["requirements"]["mandatory_skills"]) == 2
+    assert "3. Tư duy và khả năng làm việc" not in profile["preferred_requirements"]
+    assert len(profile["preferred_requirements"]) == 2
+
+

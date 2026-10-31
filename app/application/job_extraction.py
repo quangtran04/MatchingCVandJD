@@ -19,6 +19,7 @@ SECTION_KEYS = {
         "yêu cầu đối với ứng viên", "tiêu chuẩn ứng viên", "tiêu chuẩn tuyển dụng", "tiêu chí tuyển dụng",
         "kỹ năng & yêu cầu", "kỹ năng yêu cầu", "kỹ năng chuyên môn", "kỹ năng cần có", "kỹ năng",
         "chuyên môn", "yêu cầu năng lực", "yêu cầu kinh nghiệm", "kinh nghiệm & kỹ năng",
+        "kiến thức nền tảng", "kiến thức chuyên môn", "nền tảng kỹ thuật", "nền tảng chuyên môn",
         "job requirements", "candidate requirements", "minimum qualifications", "basic qualifications",
         "what we look for", "what you need", "what you ll need", "who you are", "profile requirements",
         "skills and requirements", "skills requirements", "required skills", "profile",
@@ -26,6 +27,8 @@ SECTION_KEYS = {
     "preferred": {
         "preferred", "preferred requirements", "nice to have", "điểm cộng", "ưu tiên", "plus", "atout",
         "von vorteil", "yêu cầu ưu tiên", "kỹ năng ưu tiên", "tiêu chí ưu tiên", "lợi thế",
+        "tư duy và khả năng làm việc", "tư duy & khả năng làm việc", "tư duy làm việc",
+        "kỹ năng mềm", "thái độ làm việc",
         "preferred qualifications", "bonus points", "good to have", "desired skills", "ưu tiên ứng viên",
     },
     "benefits": {
@@ -219,11 +222,25 @@ def _split_sections(lines: list[str]) -> dict[str, list[str]]:
     return result
 
 
+def _is_numbered_subheading(line: str, has_bullet_siblings: bool) -> bool:
+    if not has_bullet_siblings:
+        return False
+    stripped = line.strip()
+    if not re.match(r"^(?:\d+|[IVXLCDM]+)[\.\)]\s+\S+", stripped, re.IGNORECASE):
+        return False
+    cleaned = _clean_heading(stripped)
+    return len(cleaned.split()) <= 8 and not stripped.endswith((".", "!", "?"))
+
+
 def _clean_bullets(lines: list[str]) -> list[str]:
+    has_bullet_siblings = any(
+        line.lstrip().startswith(("•", "-", "–", "—", "*", "+")) for line in lines
+    )
     return _unique(
         clean
         for line in lines
-        if (clean := line.lstrip("•-–—*+ ").strip())
+        if not _is_numbered_subheading(line, has_bullet_siblings)
+        and (clean := line.lstrip("•-–—*+ ").strip())
         and not re.fullmatch(r"\d+[.)]?|[IVXLCDM]+[.)]?", clean, re.IGNORECASE)
     )
 
@@ -291,7 +308,8 @@ def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str
         re.IGNORECASE,
     )
     location_match = re.search(
-        r"(?:work\s*location|location|nơi làm việc|địa điểm)\s*[:\-]?\s*(.+)",
+        r"(?:work\s*location|location|nơi làm việc|địa điểm(?:\s+làm\s+việc)?)"
+        r"(?:\s*\([^)]*\))?\s*[:\-]?\s*(.+)",
         content,
         re.IGNORECASE,
     )
@@ -304,7 +322,10 @@ def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str
     location_str = ""
     if location_match:
         raw_location = location_match.group(1).strip()
-        split_pattern = r"(?:\s*1\.\s*Tòa|\s*(?:sau|trước)\s*sáp nhập:?)"
+        split_pattern = (
+            r"(?:\s*1\.\s*Tòa|\s*(?:sau|trước)\s*sáp nhập:?"
+            r"|\s*(?:Thời gian làm việc|Cách thức ứng tuyển|Hồ sơ bao gồm|Quyền lợi)\b)"
+        )
         parts = re.split(split_pattern, raw_location, flags=re.IGNORECASE)
         location_str = parts[0].strip(" .-|()")
 

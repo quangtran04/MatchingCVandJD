@@ -13,6 +13,7 @@ class TextExtractionError(Exception):
 
 
 SUPPORTED_SUFFIXES = {".txt", ".pdf", ".docx"}
+_ICON_SEPARATORS = {"⋄", "◆", "◇", "❖", "♦", "✦", "✧", "∙", "‣", "➤", "▪", "▫", "○", "●"}
 
 
 def extract_text(payload: bytes, filename: str) -> tuple[str, str]:
@@ -57,7 +58,9 @@ def _extract_docx(payload: bytes) -> str:
 
     try:
         document = Document(BytesIO(payload))
-        parts = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
+        parts = [
+            paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()
+        ]
         for table in document.tables:
             for row in table.rows:
                 parts.extend(cell.text.strip() for cell in row.cells if cell.text.strip())
@@ -70,18 +73,59 @@ def _extract_docx(payload: bytes) -> str:
     return text
 
 
+def _extract_pdf_page_text(page: object) -> str:
+    try:
+        raw = page.get_text("rawdict")  # type: ignore[attr-defined]
+    except (AttributeError, TypeError, ValueError, RuntimeError):
+        return page.get_text("text")  # type: ignore[attr-defined]
+
+    if not isinstance(raw, dict) or not raw.get("blocks"):
+        return page.get_text("text")  # type: ignore[attr-defined]
+
+    lines: list[str] = []
+    for block in raw.get("blocks", []):
+        for line in block.get("lines", []):
+            chars: list[str] = []
+            prev_x1: float | None = None
+            for span in line.get("spans", []):
+                size = float(span.get("size") or 10.0)
+                for char in span.get("chars", []):
+                    glyph = char.get("c", "")
+                    bbox = char.get("bbox", (0.0, 0.0, 0.0, 0.0))
+                    x0, x1 = float(bbox[0]), float(bbox[2])
+                    if (
+                        prev_x1 is not None
+                        and glyph != " "
+                        and chars
+                        and chars[-1] != " "
+                        and chars[-1] not in _ICON_SEPARATORS
+                        and (x0 - prev_x1) > size * 0.15
+                    ):
+                        chars.append(" ")
+                    chars.append(glyph)
+                    prev_x1 = x1
+            line_text = "".join(chars).strip()
+            if line_text:
+                lines.append(line_text)
+    return "\n".join(lines) if lines else page.get_text("text")  # type: ignore[attr-defined]
+
+
 def _extract_pdf(payload: bytes) -> tuple[str, str]:
     text = ""
     method = ""
 
     try:
-        import fitz
+        try:
+            import pymupdf as fitz
+        except ImportError:
+            import fitz
         document = fitz.open(stream=payload, filetype="pdf")
-        text = "\n".join(page.get_text("text") for page in document).strip()
+        text = "\n".join(_extract_pdf_page_text(page) for page in document).strip()
         method = "pdf_text"
     except ImportError:
         try:
             from pypdf import PdfReader
+
             reader = PdfReader(BytesIO(payload))
             text = "\n".join(page.extract_text() or "" for page in reader.pages).strip()
             method = "pdf_text"

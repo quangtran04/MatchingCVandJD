@@ -10,8 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/styles.css?v=20261010-nlp" />
-    <link rel="stylesheet" href="/static/match-report.css?v=20261014-jd" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261031-ui2" />
+    <link rel="stylesheet" href="/static/match-report.css?v=20261031-ui2" />
   </head>
   <body>
     <div class="page-glow glow-one"></div>
@@ -23,7 +23,7 @@
         <span>Talent<span>Lens</span></span>
       </a>
       <div class="topbar-right">
-        <span class="demo-pill"><i></i> Prototype UI</span>
+        <span class="demo-pill"><i></i> NLP Matching Workspace</span>
         <button class="icon-button" aria-label="Cài đặt">⚙</button>
         <button class="avatar" aria-label="Tài khoản">QT</button>
       </div>
@@ -34,105 +34,148 @@
         <div>
           <p class="eyebrow">AI RECRUITMENT WORKSPACE</p>
           <h1>Đọc CV sâu hơn.<br /><em>Tuyển dụng</em> tự tin hơn.</h1>
-          <p class="hero-copy">Trích xuất thông tin từ CV, phân tích yêu cầu công việc và đánh giá mức độ phù hợp bằng ba tầng so khớp minh bạch.</p>
+          <p class="hero-copy">Trích xuất thông tin cấu trúc từ CV, phân tích yêu cầu công việc (JD) và đánh giá mức độ phù hợp bằng ba tầng so khớp minh bạch.</p>
         </div>
         <div class="hero-side">
-          <span>QUY TRÌNH</span>
-          <strong>01 — Nhập dữ liệu<br />02 — Trích xuất<br />03 — Đánh giá</strong>
+          <span>QUY TRÌNH 3 BƯỚC</span>
+          <strong>01 — Nhập dữ liệu CV &amp; JD<br />02 — Bóc tách thông tin<br />03 — Đối chiếu &amp; Chấm điểm</strong>
         </div>
       </section>
 
       <section class="workflow" aria-label="Tiến trình">
         <div class="workflow-actions">
-          <div class="workflow-action"><button class="pipeline-button" id="info-extract-button" disabled><span>✦</span> Trích xuất thông tin</button><small>Cần có text CV & JD</small></div>
-          <div class="workflow-action"><button class="pipeline-button" id="pipeline-match-button" disabled><span>→</span> Đánh giá phù hợp</button><small>Hoàn tất bước 02</small></div>
+          <div class="workflow-action">
+            <button class="pipeline-button" id="info-extract-button" disabled><span>✦</span> Trích xuất thông tin</button>
+            <small>Cần có văn bản CV &amp; JD</small>
+          </div>
+          <div class="workflow-action">
+            <button class="pipeline-button" id="pipeline-match-button" disabled><span>→</span> Đánh giá phù hợp</button>
+            <small>Hoàn tất bước 02</small>
+          </div>
         </div>
         <div class="workflow-track">
-          <div class="step active" data-step="1"><button class="step-number" id="go-to-input" type="button" aria-label="Quay lại bước 1: nhập CV và JD">01</button><b>Nhập CV & JD</b></div>
+          <div class="step active" data-step="1">
+            <button class="step-number" id="go-to-input" type="button" aria-label="Bước 1: Nhập CV và JD">01</button>
+            <b>Nhập CV &amp; JD</b>
+          </div>
           <i class="track-line"></i>
-          <div class="step" data-step="2"><span>02</span><b>Trích xuất thông tin</b></div>
+          <div class="step" data-step="2">
+            <button class="step-number" id="go-to-extraction" type="button" aria-label="Bước 2: Trích xuất thông tin">02</button>
+            <b>Trích xuất thông tin</b>
+          </div>
           <i class="track-line"></i>
-          <div class="step" data-step="3"><span>03</span><b>Đánh giá phù hợp</b></div>
+          <div class="step" data-step="3">
+            <button class="step-number" id="go-to-match" type="button" aria-label="Bước 3: Đánh giá phù hợp">03</button>
+            <b>Đánh giá phù hợp</b>
+          </div>
         </div>
       </section>
 
       <section id="stage-1" class="stage-view">
-      <section class="input-grid">
-        <article class="input-card cv-card">
-          <div class="card-heading">
-            <div>
-              <p class="section-label">NGUỒN 01</p>
-              <h2>Hồ sơ ứng viên <span>CV</span></h2>
+        <section class="input-grid">
+          <article class="input-card cv-card">
+            <div class="card-heading">
+              <div>
+                <p class="section-label">NGUỒN 01 · CANDIDATE PROFILE</p>
+                <h2>Hồ sơ ứng viên <span>CV</span></h2>
+              </div>
+              <span class="document-icon">⌁</span>
             </div>
-            <span class="document-icon">⌁</span>
-          </div>
 
-          <div class="upload-zone" data-drop-zone="cv" style="cursor: pointer;">
-            <input id="cv-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
-            <div class="upload-icon">↑</div>
-            <p><strong>Kéo thả tệp vào đây</strong> hoặc <span style="text-decoration: underline;">chọn tệp</span></p>
-            <small>PDF có text, Word (.docx), TXT · Tối đa 10MB</small>
-            <div class="file-selected" id="cv-file-name" aria-live="polite"></div>
-          </div>
-
-          <div class="or-divider"><span>hoặc dán nội dung</span></div>
-          <label class="sr-only" for="cv-text">Nội dung CV</label>
-          <textarea id="cv-text" placeholder="Dán nội dung CV của ứng viên tại đây…"></textarea>
-          <div class="textarea-footer"><span id="cv-count">0 ký tự</span><span>⌘ V để dán</span></div>
-        </article>
-
-        <article class="input-card jd-card">
-          <div class="card-heading">
-            <div>
-              <p class="section-label">NGUỒN 02</p>
-              <h2>Mô tả công việc <span>JD</span></h2>
+            <div class="upload-zone" data-drop-zone="cv" style="cursor: pointer;">
+              <input id="cv-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
+              <div class="upload-icon">↑</div>
+              <p><strong>Kéo thả tệp CV vào đây</strong> hoặc <span class="upload-link">chọn tệp từ máy</span></p>
+              <small>Hỗ trợ PDF có lớp text, Word (.docx), TXT · Tối đa 10MB</small>
+              <div class="file-selected" id="cv-file-name" aria-live="polite"></div>
             </div>
-            <span class="document-icon">✦</span>
+
+            <div class="or-divider"><span>hoặc dán / kiểm tra văn bản thô</span></div>
+            <label class="sr-only" for="cv-text">Nội dung CV</label>
+            <textarea id="cv-text" placeholder="Dán nội dung CV của ứng viên tại đây…"></textarea>
+            <div class="textarea-footer"><span id="cv-count">0 ký tự</span><span>Ctrl+V để dán nhanh</span></div>
+          </article>
+
+          <article class="input-card jd-card">
+            <div class="card-heading">
+              <div>
+                <p class="section-label">NGUỒN 02 · JOB DESCRIPTION</p>
+                <h2>Mô tả công việc <span>JD</span></h2>
+              </div>
+              <span class="document-icon">✦</span>
+            </div>
+
+            <div class="upload-zone" data-drop-zone="jd" style="cursor: pointer;">
+              <input id="jd-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
+              <div class="upload-icon">↑</div>
+              <p><strong>Kéo thả tệp JD vào đây</strong> hoặc <span class="upload-link">chọn tệp từ máy</span></p>
+              <small>Hỗ trợ PDF có lớp text, Word (.docx), TXT · Tối đa 10MB</small>
+              <div class="file-selected" id="jd-file-name" aria-live="polite"></div>
+            </div>
+
+            <div class="or-divider"><span>hoặc dán / kiểm tra văn bản thô</span></div>
+            <label class="sr-only" for="jd-text">Nội dung JD</label>
+            <textarea id="jd-text" placeholder="Dán mô tả công việc (JD) tại đây…"></textarea>
+            <div class="textarea-footer"><span id="jd-count">0 ký tự</span><span>Ctrl+V để dán nhanh</span></div>
+          </article>
+        </section>
+
+        <section class="action-area">
+          <div class="action-copy">
+            <span class="spark">⌁</span>
+            <div>
+              <strong>Đã chọn tệp tải lên?</strong>
+              <p>Bấm trích xuất văn bản thô từ PDF, DOCX hoặc TXT trước khi chuyển sang Bước 02.</p>
+            </div>
           </div>
-
-          <div class="upload-zone" data-drop-zone="jd" style="cursor: pointer;">
-            <input id="jd-file" type="file" accept=".txt,.pdf,.docx" style="display: none;" />
-            <div class="upload-icon">↑</div>
-            <p><strong>Kéo thả tệp vào đây</strong> hoặc <span style="text-decoration: underline;">chọn tệp</span></p>
-            <small>PDF có text, Word (.docx), TXT · Tối đa 10MB</small>
-            <div class="file-selected" id="jd-file-name" aria-live="polite"></div>
+          <div class="action-buttons">
+            <button class="button primary" id="extract-button"><span>⌘</span> Trích xuất văn bản từ tệp <b>→</b></button>
           </div>
-
-          <div class="or-divider"><span>hoặc dán nội dung</span></div>
-          <label class="sr-only" for="jd-text">Nội dung JD</label>
-          <textarea id="jd-text" placeholder="Dán mô tả công việc tại đây…"></textarea>
-          <div class="textarea-footer"><span id="jd-count">0 ký tự</span><span>⌘ V để dán</span></div>
-        </article>
-      </section>
-
-      <section class="action-area">
-        <div class="action-copy"><span class="spark">⌁</span><div><strong>Đã tải tệp?</strong><p>Trích xuất văn bản thô từ TXT, DOCX hoặc PDF có text trước khi sang bước 02.</p></div></div>
-        <div class="action-buttons">
-          <button class="button primary" id="extract-button"><span>⌘</span> Trích xuất văn bản từ tệp <b>→</b></button>
-        </div>
-      </section>
+        </section>
       </section>
 
       <section id="extraction-result" class="stage-view results-section hidden" aria-live="polite">
         <div class="result-heading">
-          <div><p class="section-label">BƯỚC 02 · THÔNG TIN CẤU TRÚC</p><h2>Thông tin đã trích xuất</h2></div>
-          <div class="result-actions"><span class="status-tag">● Sẵn sàng đánh giá</span><button class="text-button" id="back-to-input">← Chỉnh sửa đầu vào</button></div>
+          <div>
+            <p class="section-label">BƯỚC 02 · HỒ SƠ ĐÃ CẤU TRÚC</p>
+            <h2>Thông tin bóc tách từ CV &amp; JD</h2>
+          </div>
+          <div class="result-actions">
+            <span class="status-tag">● Sẵn sàng đối chiếu</span>
+            <button class="text-button" id="back-to-input">← Chỉnh sửa văn bản đầu vào</button>
+          </div>
         </div>
-        <div class="extraction-tabs" role="tablist" aria-label="Nguồn thông tin đã trích xuất">
-          <button class="extraction-tab active" id="cv-tab" type="button" role="tab" aria-selected="true" data-source="cv">01 · Hồ sơ ứng viên</button>
-          <button class="extraction-tab" id="jd-tab" type="button" role="tab" aria-selected="false" data-source="jd">02 · Mô tả công việc</button>
+        <div class="extraction-toolbar">
+          <div class="extraction-tabs" role="tablist" aria-label="Nguồn thông tin đã trích xuất">
+            <button class="extraction-tab active" id="cv-tab" type="button" role="tab" aria-selected="true" data-source="cv">
+              <span>01</span> Hồ sơ ứng viên (CV)
+            </button>
+            <button class="extraction-tab" id="jd-tab" type="button" role="tab" aria-selected="false" data-source="jd">
+              <span>02</span> Mô tả công việc (JD)
+            </button>
+          </div>
         </div>
         <div id="extraction-fields" class="extracted-grid"></div>
       </section>
 
       <section id="match-result" class="stage-view results-section hidden" aria-live="polite">
         <div class="result-heading">
-          <div><p class="section-label">BƯỚC 03 · KẾT QUẢ ĐÁNH GIÁ</p><h2>Mức độ phù hợp</h2></div>
-          <div class="result-actions"><span class="status-tag">● Đã phân tích</span><button class="text-button" id="back-to-extraction">← Xem thông tin trích xuất</button></div>
+          <div>
+            <p class="section-label">BƯỚC 03 · BÁO CÁO ĐÁNH GIÁ</p>
+            <h2>Mức độ phù hợp giữa CV &amp; JD</h2>
+          </div>
+          <div class="result-actions">
+            <span class="status-tag">● Đã phân tích</span>
+            <button class="text-button" id="back-to-extraction">← Xem lại hồ sơ trích xuất</button>
+          </div>
         </div>
         <div class="report-overview">
           <article class="report-overall">
-            <div><p class="report-eyebrow">MỨC ĐỘ PHÙ HỢP VỚI JD</p><h3 id="overall-title">Chưa đánh giá</h3><p id="overall-summary"></p></div>
+            <div>
+              <p class="report-eyebrow">MỨC ĐỘ PHÙ HỢP TỔNG THỂ</p>
+              <h3 id="overall-title">Chưa đánh giá</h3>
+              <p id="overall-summary"></p>
+            </div>
             <div class="report-ring" id="score-ring"><strong id="overall-value">—</strong><span id="overall-unit"></span></div>
           </article>
           <nav class="report-score-grid" id="metric-list" aria-label="Điểm theo tiêu chí"></nav>
@@ -142,12 +185,21 @@
           <summary><strong id="project-bonus-value"></strong><span id="project-bonus-summary"></span><em>Xem bằng chứng</em></summary>
           <div class="report-bonus-evidence" id="project-bonus-evidence"></div>
         </details>
-        <div class="report-section-heading"><div><p class="section-label">ĐỐI CHIẾU THEO JD</p><h3>JD cần gì, CV có bằng chứng gì?</h3></div><p>Mỗi nhiệm vụ và yêu cầu đều dẫn tới nội dung tương ứng trong CV.</p></div>
+        <div class="report-section-heading">
+          <div>
+            <p class="section-label">ĐỐI CHIẾU CHI TIẾT</p>
+            <h3>JD cần gì, CV có bằng chứng gì?</h3>
+          </div>
+          <p>Mỗi nhiệm vụ và yêu cầu trong JD đều được truy vết trực tiếp tới phần nội dung tương ứng trong CV.</p>
+        </div>
         <div class="report-sections" id="report-sections"></div>
       </section>
     </main>
 
-    <footer class="shell"><span>TalentLens / NLP matching prototype</span><span>Designed for better hiring decisions</span></footer>
-    <script src="/static/app.js?v=20261014-jd"></script>
+    <footer class="shell">
+      <span>TalentLens · Hệ thống trích xuất &amp; so khớp CV – JD</span>
+      <span>Explainable NLP Matching</span>
+    </footer>
+    <script src="/static/app.js?v=20261031-ui2"></script>
   </body>
 </html>

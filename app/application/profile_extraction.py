@@ -16,40 +16,132 @@ from app.application.nlp_text import tokenize
 
 SECTION_ALIASES = {
     "summary": {
-        "summary", "profile", "professional summary", "about me", "objective", "resume", "resumen",
-        "zusammenfassung", "tom tat", "gioi thieu", "gioi thieu ban than", "muc tieu nghe nghiep", "muc tieu",
+        "summary",
+        "profile",
+        "professional summary",
+        "about me",
+        "objective",
+        "resume",
+        "resumen",
+        "zusammenfassung",
+        "tom tat",
+        "gioi thieu",
+        "gioi thieu ban than",
+        "muc tieu nghe nghiep",
+        "muc tieu",
     },
     "skills": {
-        "skills", "technical skills", "core skills", "competencies", "competences", "habilidades",
-        "fahigkeiten", "ky nang", "ky nang chuyen mon", "nang luc", "ky nang lam viec",
+        "skills",
+        "technical skills",
+        "core skills",
+        "competencies",
+        "competences",
+        "habilidades",
+        "fahigkeiten",
+        "ky nang",
+        "ky nang chuyen mon",
+        "nang luc",
+        "ky nang lam viec",
     },
     "experience": {
-        "experience", "work experience", "professional experience", "employment history", "experiencia",
-        "berufserfahrung", "kinh nghiem", "kinh nghiem lam viec", "qua trinh cong tac", "kinh nghiem viec lam",
+        "experience",
+        "work experience",
+        "professional experience",
+        "employment history",
+        "experiencia",
+        "berufserfahrung",
+        "kinh nghiem",
+        "kinh nghiem lam viec",
+        "qua trinh cong tac",
+        "kinh nghiem viec lam",
         "qua trinh lam viec",
     },
     "education": {
-        "education", "academic background", "qualifications", "formation", "educacion", "ausbildung",
-        "hoc van", "trinh do hoc van", "dai hoc", "qua trinh dao tao", "dao tao", "trinh do chuyen mon",
-        "bang cap", "qua trinh hoc tap",
+        "education",
+        "academic background",
+        "qualifications",
+        "formation",
+        "educacion",
+        "ausbildung",
+        "hoc van",
+        "trinh do hoc van",
+        "dai hoc",
+        "qua trinh dao tao",
+        "dao tao",
+        "trinh do chuyen mon",
+        "bang cap",
+        "qua trinh hoc tap",
     },
     "projects": {
-        "projects", "project experience", "selected projects", "projets", "proyectos", "projekte",
-        "du an", "kinh nghiem du an", "du an ca nhan", "cac du an",
+        "projects",
+        "project experience",
+        "selected projects",
+        "projets",
+        "proyectos",
+        "projekte",
+        "du an",
+        "kinh nghiem du an",
+        "du an ca nhan",
+        "cac du an",
     },
     "certificates": {
-        "certifications", "certificates", "certification", "certificats", "certificaciones", "zertifikate",
-        "chung chi", "giai thuong", "chung chi va giai thuong", "khen thuong",
+        "certifications",
+        "certificates",
+        "certification",
+        "certificats",
+        "certificaciones",
+        "zertifikate",
+        "chung chi",
+        "giai thuong",
+        "chung chi va giai thuong",
+        "khen thuong",
     },
     "languages": {
-        "languages", "language", "language skills", "langues", "idiomas", "sprachen", "ngoai ngu", "ngon ngu",
+        "languages",
+        "language",
+        "language skills",
+        "langues",
+        "idiomas",
+        "sprachen",
+        "ngoai ngu",
+        "ngon ngu",
     },
+}
+
+GENERIC_SKILL_CATEGORIES = {
+    "programming languages",
+    "ngon ngu lap trinh",
+    "languages",
+    "ngon ngu",
+    "databases",
+    "database",
+    "co so du lieu",
+    "tools",
+    "cong cu",
+    "other",
+    "khac",
+    "ai",
+    "thu vien ai",
+    "ai libraries",
+    "libraries",
+    "thu vien",
+    "frameworks",
+    "kien thuc nen tang",
+    "fundamentals",
+    "core knowledge",
+    "ky nang ca nhan",
+    "ky nang mem",
+    "soft skills",
+    "technical skills",
+    "ky nang chuyen mon",
 }
 
 EMAIL_PATTERN = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
 PHONE_PATTERN = re.compile(r"(?:(?:\+|00)\d{1,3}[\s.-]?)?(?:\(?\d{2,4}\)?[\s.-]?){2,4}\d{2,4}")
 DATE_PATTERN = re.compile(
-    r"(?:\d{1,2}[/.\-]\d{4}|\d{4})\s*(?:–|-|to|đến)\s*(?:present|current|nay|hiện tại|\d{1,2}[/.\-]\d{4}|\d{4})",
+    r"(?:(?:\d{1,2}[/.\-]\d{4}|\d{4})\s*(?:–|-|to|đến)\s*"
+    r"(?:present|current|nay|hiện tại|\d{1,2}[/.\-]\d{4}|\d{4})(?:\s*\([^)]*\))?"
+    r"|^(?:\d{1,2}[/.\-])?\d{4}(?:\s*\([^)]*\))?$)",
     re.IGNORECASE,
 )
 ADDRESS_PATTERN = re.compile(r"(?:địa chỉ|dia chi|address)\s*[:\-]\s*(.+)", re.IGNORECASE)
@@ -84,14 +176,21 @@ def _normalize_key(value: str) -> str:
 
 def _normalize_text(text: str) -> str:
     text = text.replace("\r\n", "\n").replace("\r", "\n")
-    text = re.sub(r"(?<=[A-Za-z])-\n(?=[A-Za-z])", "", text)
+    text = re.sub(r"(?<=[A-Za-zÀ-ỹ])-\n(?=[a-zà-ỹ])", "", text)
+    text = re.sub(r"(?<=[A-Za-zÀ-ỹ])-\n(?=[A-ZÀ-Ỹ])", "-", text)
     return "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()).strip()
 
 
 def _section_for_heading(line: str) -> str | None:
     key = _normalize_key(line.strip(" :.-•"))
+    if not key:
+        return None
+    compact = key.replace(" ", "")
     for field, aliases in SECTION_ALIASES.items():
-        if key in {_normalize_key(alias) for alias in aliases}:
+        normalized_aliases = {_normalize_key(alias) for alias in aliases}
+        if key in normalized_aliases or (
+            len(compact) >= 4 and compact in {alias.replace(" ", "") for alias in normalized_aliases}
+        ):
             return field
     return None
 
@@ -116,14 +215,56 @@ def _collapse(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
-def _extract_skills(section: str) -> list[str]:
-    skills: list[str] = []
-    for line in section.splitlines():
-        clean = line.lstrip("•-– ").strip()
+def _merge_skill_lines(section: str) -> list[str]:
+    merged: list[str] = []
+    raw_lines = [line.strip() for line in section.splitlines() if line.strip()]
+    has_structure = any(
+        line.startswith(("•", "-", "–")) or ":" in line for line in raw_lines
+    )
+    for raw_line in raw_lines:
+        is_bullet = raw_line.startswith(("•", "-", "–"))
+        clean = raw_line.lstrip("•-– ").strip()
         if not clean:
             continue
+        if not is_bullet and ":" not in clean and _is_skill_heading(clean):
+            continue
+        if (
+            merged
+            and not is_bullet
+            and ":" not in clean
+            and (
+                has_structure
+                or clean.startswith("(")
+                or clean[0].islower()
+                or merged[-1].endswith((",", ";", "|", ":"))
+            )
+        ):
+            merged[-1] = f"{merged[-1]} {clean}"
+        else:
+            merged.append(clean)
+    return merged
+
+
+def _is_generic_skill_category(label: str) -> bool:
+    key = _normalize_key(label)
+    compact = key.replace(" ", "")
+    return key in GENERIC_SKILL_CATEGORIES or compact in {
+        item.replace(" ", "") for item in GENERIC_SKILL_CATEGORIES
+    }
+
+
+def _extract_skills(section: str) -> list[str]:
+    skills: list[str] = []
+    for clean in _merge_skill_lines(section):
         if ":" in clean:
-            clean = clean.split(":", 1)[1].strip()
+            prefix, clean = clean.split(":", 1)
+            prefix = prefix.strip(" .•-–")
+            clean = clean.strip()
+            if prefix and not _is_generic_skill_category(prefix):
+                for part in re.split(r"[,;|&]", prefix):
+                    part = part.strip(" .•-–")
+                    if part and len(part) > 1 and not _is_skill_heading(part):
+                        skills.append(part)
         for item in re.split(r"[,;|]", clean):
             item = item.strip(" .•-–")
             if item.startswith("(") and skills:
@@ -142,7 +283,10 @@ def _extract_skills(section: str) -> list[str]:
 
 
 def _is_skill_heading(value: str) -> bool:
-    return _normalize_key(value) in {"technical skills", "language", "tools", "other", "ky nang"}
+    key = _normalize_key(value)
+    compact = key.replace(" ", "")
+    headings = {"technical skills", "language", "tools", "other", "ky nang", "ky nang chuyen mon"}
+    return key in headings or compact in {item.replace(" ", "") for item in headings}
 
 
 def _extract_entries(section: str, kind: str) -> list[dict[str, str]]:
@@ -170,10 +314,20 @@ def _extract_entries(section: str, kind: str) -> list[dict[str, str]]:
 def _looks_like_entry_start(line: str, kind: str) -> bool:
     clean = line.lstrip("• ").strip()
     if kind == "project":
-        return line.startswith("•") or (" - " in clean and not clean.lower().startswith("technologies"))
+        return (
+            line.startswith("•")
+            or " | " in clean
+            or (" - " in clean and not clean.lower().startswith("technologies"))
+        )
     if kind == "experience":
         return "—" in clean or " - " in clean or " @ " in clean
-    return bool(re.search(r"university|college|school|academy|đại học|học viện|cao đẳng", clean, re.IGNORECASE))
+    return bool(
+        re.search(
+            r"university|college|school|academy|đại học|học viện|cao đẳng",
+            clean,
+            re.IGNORECASE,
+        )
+    )
 
 
 def _extract_bullets(section: str) -> list[str]:
