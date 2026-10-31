@@ -1,11 +1,18 @@
 """FastAPI entry point for document, extraction, and matching endpoints."""
 
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from app.application.document_validation import (
+    InvalidDocumentError,
+    ensure_cv,
+    ensure_jd,
+    ensure_pair,
+)
 from app.application.job_extraction import extract_job_profile
 from app.application.matching import match_profiles
 from app.application.profile_extraction import extract_cv_profile
@@ -17,6 +24,44 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 class InformationExtractionRequest(BaseModel):
     cv_text: str
     jd_text: str
+
+
+class DocumentValidationRequest(BaseModel):
+    kind: Literal["cv", "jd"]
+    text: str
+
+
+def _invalid_document_http_error(error: InvalidDocumentError) -> HTTPException:
+    return HTTPException(
+        status_code=422,
+        detail={
+            "code": "INVALID_DOCUMENT",
+            "message": " ".join(f"{r.expected.upper()}: {r.message}" for r in error.results),
+            "errors": [
+                {
+                    "field": r.expected,
+                    "detected": r.detected,
+                    "message": r.message,
+                    "cv_score": r.cv_score,
+                    "jd_score": r.jd_score,
+                }
+                for r in error.results
+            ],
+        },
+    )
+
+
+def _validate_request(request: InformationExtractionRequest) -> None:
+    """Chặn văn bản không phải CV/JD (hoặc dán nhầm ô) trước khi trích xuất."""
+    if not request.cv_text.strip() or not request.jd_text.strip():
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "MISSING_INPUT", "message": "CV và JD đều phải có văn bản."},
+        )
+    try:
+        ensure_pair(request.cv_text, request.jd_text)
+    except InvalidDocumentError as error:
+        raise _invalid_document_http_error(error) from error
 
 
 def create_app() -> FastAPI:
@@ -57,14 +102,19 @@ def create_app() -> FastAPI:
             ) from error
         return {"filename": file.filename or "", "text": text, "method": method}
 
+    @app.post("/api/validate-document", tags=["extraction"])
+    async def validate_document(request: DocumentValidationRequest) -> dict[str, object]:
+        """Kiểm tra văn bản có đúng là CV / JD hay không (gọi sau khi trích xuất văn bản)."""
+        try:
+            (ensure_cv if request.kind == "cv" else ensure_jd)(request.text)
+        except InvalidDocumentError as error:
+            raise _invalid_document_http_error(error) from error
+        return {"valid": True, "kind": request.kind}
+
     @app.post("/api/extract-information", tags=["extraction"])
     async def extract_information(request: InformationExtractionRequest) -> dict[str, object]:
         """Extract the structured CV profile; JD is retained for the next NLP phase."""
-        if not request.cv_text.strip() or not request.jd_text.strip():
-            raise HTTPException(
-                status_code=422,
-                detail={"code": "MISSING_INPUT", "message": "CV và JD đều phải có văn bản."},
-            )
+        _validate_request(request)
         return {
             "cv_profile": extract_cv_profile(request.cv_text),
             "jd_profile": extract_job_profile(request.jd_text),
@@ -73,11 +123,7 @@ def create_app() -> FastAPI:
     @app.post("/api/match", tags=["matching"])
     async def match_information(request: InformationExtractionRequest) -> dict[str, object]:
         """Extract both profiles and return an evidence-backed matching report."""
-        if not request.cv_text.strip() or not request.jd_text.strip():
-            raise HTTPException(
-                status_code=422,
-                detail={"code": "MISSING_INPUT", "message": "CV và JD đều phải có văn bản."},
-            )
+        _validate_request(request)
         cv_profile = extract_cv_profile(request.cv_text)
         jd_profile = extract_job_profile(request.jd_text)
         return match_profiles(cv_profile, jd_profile)
