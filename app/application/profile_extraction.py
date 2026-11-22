@@ -21,6 +21,7 @@ SECTION_ALIASES = {
         "professional summary",
         "about me",
         "objective",
+        "career objective",
         "resume",
         "resumen",
         "zusammenfassung",
@@ -140,7 +141,7 @@ EMAIL_PATTERN = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECA
 PHONE_PATTERN = re.compile(r"(?:(?:\+|00)\d{1,3}[\s.-]?)?(?:\(?\d{2,4}\)?[\s.-]?){2,4}\d{2,4}")
 DATE_PATTERN = re.compile(
     r"(?:(?:\d{1,2}[/.\-]\d{4}|\d{4})\s*(?:–|-|to|đến)\s*"
-    r"(?:present|current|nay|hiện tại|\d{1,2}[/.\-]\d{4}|\d{4})(?:\s*\([^)]*\))?"
+    r"(?:(?:present|current|nay|hiện tại)(?:\s*/\s*(?:present|current|nay|hiện tại))?|\d{1,2}[/.\-]\d{4}|\d{4})(?:\s*\([^)]*\))?"
     r"|^(?:\d{1,2}[/.\-])?\d{4}(?:\s*\([^)]*\))?$)",
     re.IGNORECASE,
 )
@@ -181,8 +182,8 @@ def _normalize_text(text: str) -> str:
     return "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in text.splitlines()).strip()
 
 
-def _section_for_heading(line: str) -> str | None:
-    key = _normalize_key(line.strip(" :.-•"))
+def _match_single_heading(segment: str) -> str | None:
+    key = _normalize_key(segment.strip(" :.-•"))
     if not key:
         return None
     compact = key.replace(" ", "")
@@ -192,6 +193,21 @@ def _section_for_heading(line: str) -> str | None:
             len(compact) >= 4 and compact in {alias.replace(" ", "") for alias in normalized_aliases}
         ):
             return field
+    return None
+
+
+def _section_for_heading(line: str) -> str | None:
+    direct = _match_single_heading(line)
+    if direct:
+        return direct
+    # Support bilingual slash/pipe headings such as "KỸ NĂNG / SKILLS"
+    if "/" in line or "|" in line:
+        parts = [part.strip() for part in re.split(r"[/|]", line) if part.strip()]
+        if 2 <= len(parts) <= 3:
+            matched = [_match_single_heading(part) for part in parts]
+            non_null = [field for field in matched if field is not None]
+            if non_null and len(set(non_null)) == 1:
+                return non_null[0]
     return None
 
 
@@ -320,7 +336,14 @@ def _looks_like_entry_start(line: str, kind: str) -> bool:
             or (" - " in clean and not clean.lower().startswith("technologies"))
         )
     if kind == "experience":
-        return "—" in clean or " - " in clean or " @ " in clean
+        if DATE_PATTERN.search(clean):
+            return False
+        return (
+            "—" in clean
+            or " - " in clean
+            or " @ " in clean
+            or (" | " in clean and not EMAIL_PATTERN.search(clean))
+        )
     return bool(
         re.search(
             r"university|college|school|academy|đại học|học viện|cao đẳng",
@@ -336,7 +359,11 @@ def _extract_bullets(section: str) -> list[str]:
 
 
 def _extract_personal_info(preamble: str) -> dict[str, str]:
-    lines = [ICON_NOISE_PATTERN.sub(" ", line).strip() for line in preamble.splitlines() if line]
+    lines = [
+        ICON_NOISE_PATTERN.sub(" ", line).strip()
+        for line in preamble.splitlines()
+        if line and not re.fullmatch(r"[=\-_~*#]{3,}", line.strip())
+    ]
     lines = [line for line in lines if line]
     joined = " ".join(lines)
     emails = EMAIL_PATTERN.findall(joined)
@@ -349,7 +376,13 @@ def _extract_personal_info(preamble: str) -> dict[str, str]:
     if lines:
         info["name"] = lines[0].strip("• ")
     if len(lines) > 1 and not EMAIL_PATTERN.search(lines[1]):
-        info["headline"] = lines[1].strip("• ")
+        headline = re.sub(
+            r"^(?:vị trí ứng tuyển|applying for|position|role)(?:\s*/\s*(?:applying for|vị trí ứng tuyển))?\s*[:\-]\s*",
+            "",
+            lines[1].strip("• "),
+            flags=re.IGNORECASE,
+        )
+        info["headline"] = headline.strip()
     if emails:
         info["email"] = emails[0]
     if phones:
@@ -360,7 +393,7 @@ def _extract_personal_info(preamble: str) -> dict[str, str]:
         info["location"] = _collapse(address_match.group(1))
     else:
         location_match = re.search(
-            r"(?:hà nội|ha noi|hồ chí minh|ho chi minh|đà nẵng|da nang|hải phòng|hai phong|cần thơ|can tho)"
+            r"(?:hà nội|ha noi|hanoi|tp\.?\s*hcm|hồ chí minh|ho chi minh|đà nẵng|da nang|hải phòng|hai phong|cần thơ|can tho)"
             r"(?:\s+(?:city|thành phố))?(?:\s*,\s*(?:viet nam|vietnam))?",
             joined,
             re.IGNORECASE,

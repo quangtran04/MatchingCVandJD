@@ -1,0 +1,463 @@
+{
+  "as_of": "2026-11-22",
+  "elapsed_seconds": 73.58,
+  "dataset": {
+    "n_jds": 4,
+    "n_cvs": 80,
+    "languages": {
+      "en": 32,
+      "vi": 32,
+      "bi": 16
+    },
+    "formats": {
+      ".docx": 24,
+      ".pdf": 28,
+      ".txt": 28
+    }
+  },
+  "inter_rater_agreement": {
+    "n_pairs": 80,
+    "cohen_kappa": 0.6956,
+    "quadratic_weighted_kappa": 0.9139,
+    "spearman_rho": 0.9273,
+    "exact_agreement_pct": 77.5,
+    "within_1_agreement_pct": 100.0,
+    "rating_distribution_avg": {
+      "4.5": 8,
+      "5.0": 16,
+      "3.0": 25,
+      "1.0": 1,
+      "3.5": 3,
+      "1.5": 1,
+      "2.5": 6,
+      "2.0": 15,
+      "4.0": 5
+    }
+  },
+  "extraction_evaluation": {
+    "overall_80_cvs": {
+      "n_cvs": 80,
+      "field_accuracy_pct": {
+        "education": 100.0,
+        "email": 100.0,
+        "experience": 100.0,
+        "languages": 100.0,
+        "phone": 100.0,
+        "projects": 100.0
+      },
+      "skill_tp": 427,
+      "skill_fp": 0,
+      "skill_fn": 0,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "skill_f1": 1.0
+    },
+    "by_language": {
+      "vi": {
+        "n_cvs": 32,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 166,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      },
+      "en": {
+        "n_cvs": 32,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 185,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      },
+      "bi": {
+        "n_cvs": 16,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 76,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      }
+    },
+    "by_format": {
+      ".txt": {
+        "n_cvs": 28,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 145,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      },
+      ".docx": {
+        "n_cvs": 24,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 138,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      },
+      ".pdf": {
+        "n_cvs": 28,
+        "field_accuracy_pct": {
+          "education": 100.0,
+          "email": 100.0,
+          "experience": 100.0,
+          "languages": 100.0,
+          "phone": 100.0,
+          "projects": 100.0
+        },
+        "skill_tp": 144,
+        "skill_fp": 0,
+        "skill_fn": 0,
+        "skill_precision": 1.0,
+        "skill_recall": 1.0,
+        "skill_f1": 1.0
+      }
+    }
+  },
+  "taxonomy_coverage": {
+    "taxonomy_version": "1.3.0",
+    "total_canonical_skills_v12": 53,
+    "total_canonical_skills_v13": 110,
+    "dataset_unique_skills": 41,
+    "dataset_total_skill_mentions": 471,
+    "v12_unique_coverage_pct": 31.71,
+    "v12_mention_coverage_pct": 54.99,
+    "v13_unique_coverage_pct": 100.0,
+    "v13_mention_coverage_pct": 100.0,
+    "uncovered_skills_v13": []
+  },
+  "ranking_by_jd": {
+    "JD01_Backend_Developer": {
+      "proposed": {
+        "spearman": 0.9181,
+        "kendall": 0.799,
+        "ndcg_at_5": 0.9094,
+        "precision_at_5": 1.0
+      },
+      "baseline_keyword": {
+        "spearman": 0.9252,
+        "kendall": 0.8305,
+        "ndcg_at_5": 0.8811,
+        "precision_at_5": 1.0
+      },
+      "baseline_tfidf_fulltext": {
+        "spearman": 0.1127,
+        "kendall": 0.0743,
+        "ndcg_at_5": 0.4532,
+        "precision_at_5": 0.4
+      },
+      "baseline_sbert_multilingual": {
+        "spearman": 0.2879,
+        "kendall": 0.2115,
+        "ndcg_at_5": 0.4505,
+        "precision_at_5": 0.4
+      }
+    },
+    "JD02_Frontend_Developer": {
+      "proposed": {
+        "spearman": 0.9653,
+        "kendall": 0.8808,
+        "ndcg_at_5": 1.0,
+        "precision_at_5": 1.0
+      },
+      "baseline_keyword": {
+        "spearman": 0.9605,
+        "kendall": 0.9046,
+        "ndcg_at_5": 0.9323,
+        "precision_at_5": 1.0
+      },
+      "baseline_tfidf_fulltext": {
+        "spearman": 0.56,
+        "kendall": 0.4489,
+        "ndcg_at_5": 0.802,
+        "precision_at_5": 0.8
+      },
+      "baseline_sbert_multilingual": {
+        "spearman": 0.462,
+        "kendall": 0.3239,
+        "ndcg_at_5": 0.4883,
+        "precision_at_5": 0.6
+      }
+    },
+    "JD03_DevOps_Engineer": {
+      "proposed": {
+        "spearman": 0.9537,
+        "kendall": 0.8748,
+        "ndcg_at_5": 0.954,
+        "precision_at_5": 1.0
+      },
+      "baseline_keyword": {
+        "spearman": 0.9309,
+        "kendall": 0.8366,
+        "ndcg_at_5": 0.8026,
+        "precision_at_5": 1.0
+      },
+      "baseline_tfidf_fulltext": {
+        "spearman": 0.6773,
+        "kendall": 0.5159,
+        "ndcg_at_5": 0.6267,
+        "precision_at_5": 0.6
+      },
+      "baseline_sbert_multilingual": {
+        "spearman": 0.5787,
+        "kendall": 0.4403,
+        "ndcg_at_5": 0.7096,
+        "precision_at_5": 0.6
+      }
+    },
+    "JD04_QA_Automation_Engineer": {
+      "proposed": {
+        "spearman": 0.948,
+        "kendall": 0.8468,
+        "ndcg_at_5": 0.944,
+        "precision_at_5": 1.0
+      },
+      "baseline_keyword": {
+        "spearman": 0.9595,
+        "kendall": 0.8922,
+        "ndcg_at_5": 0.9167,
+        "precision_at_5": 1.0
+      },
+      "baseline_tfidf_fulltext": {
+        "spearman": 0.4736,
+        "kendall": 0.3817,
+        "ndcg_at_5": 0.5756,
+        "precision_at_5": 0.6
+      },
+      "baseline_sbert_multilingual": {
+        "spearman": 0.297,
+        "kendall": 0.2147,
+        "ndcg_at_5": 0.3906,
+        "precision_at_5": 0.4
+      }
+    }
+  },
+  "ranking_macro_average": {
+    "proposed": {
+      "spearman": 0.9463,
+      "kendall": 0.8504,
+      "ndcg_at_5": 0.9518,
+      "precision_at_5": 1.0
+    },
+    "baseline_keyword": {
+      "spearman": 0.944,
+      "kendall": 0.866,
+      "ndcg_at_5": 0.8832,
+      "precision_at_5": 1.0
+    },
+    "baseline_tfidf_fulltext": {
+      "spearman": 0.4559,
+      "kendall": 0.3552,
+      "ndcg_at_5": 0.6144,
+      "precision_at_5": 0.6
+    },
+    "baseline_sbert_multilingual": {
+      "spearman": 0.4064,
+      "kendall": 0.2976,
+      "ndcg_at_5": 0.5098,
+      "precision_at_5": 0.5
+    }
+  },
+  "ranking_by_cv_language": {
+    "vi": {
+      "n_cvs": 32,
+      "spearman": 0.9225,
+      "kendall": 0.7944,
+      "mean_proposed_score": 60.44,
+      "mean_human_score": 3.23
+    },
+    "en": {
+      "n_cvs": 32,
+      "spearman": 0.9525,
+      "kendall": 0.8539,
+      "mean_proposed_score": 63.88,
+      "mean_human_score": 3.5
+    },
+    "bi": {
+      "n_cvs": 16,
+      "spearman": 0.8661,
+      "kendall": 0.7257,
+      "mean_proposed_score": 70.81,
+      "mean_human_score": 3.34
+    }
+  },
+  "ablation_study": {
+    "full_system": {
+      "spearman_macro": 0.9463,
+      "kendall_macro": 0.8504,
+      "ndcg5_macro": 0.9518,
+      "mean_score": 63.89
+    },
+    "wo_semantic_tier": {
+      "spearman_macro": 0.9463,
+      "kendall_macro": 0.8504,
+      "ndcg5_macro": 0.9518,
+      "mean_score": 63.89
+    },
+    "wo_one_to_one": {
+      "spearman_macro": 0.9463,
+      "kendall_macro": 0.8504,
+      "ndcg5_macro": 0.9518,
+      "mean_score": 63.89
+    },
+    "wo_job_fit": {
+      "spearman_macro": 0.9611,
+      "kendall_macro": 0.8858,
+      "ndcg5_macro": 0.963,
+      "mean_score": 72.07
+    },
+    "wo_dynamic_weights": {
+      "spearman_macro": 0.9463,
+      "kendall_macro": 0.8504,
+      "ndcg5_macro": 0.9518,
+      "mean_score": 63.89
+    },
+    "wo_project_bonus": {
+      "spearman_macro": 0.9286,
+      "kendall_macro": 0.8134,
+      "ndcg5_macro": 0.8801,
+      "mean_score": 63.09
+    }
+  },
+  "dynamic_weight_stress_test": {
+    "scenario": "Strip experience (15%) & education (10%) from all 4 JDs (25% N/A weight)",
+    "with_dynamic_weights_mean_score": 55.61,
+    "without_dynamic_weights_mean_score": 41.9,
+    "mean_artificial_penalty_without_dynamic": 13.71,
+    "max_score_with_dynamic": 94.9,
+    "max_score_without_dynamic": 71.7
+  },
+  "semantic_and_one_to_one_stress_test": {
+    "scenario": "Umbrella JD skills (e.g. Relational Database + MySQL, Cloud Computing, Automation Testing) across 80 CVs",
+    "full_mean_skill_score": 50.02,
+    "wo_semantic_mean_skill_score": 28.78,
+    "semantic_recall_gain_pts": 21.25,
+    "wo_one_to_one_mean_skill_score": 59.52,
+    "double_counting_inflation_without_1to1_pts": 9.5
+  },
+  "weight_sensitivity": {
+    "default_40_35_15_10": {
+      "weights": {
+        "job_fit": 0.4,
+        "skill_match": 0.35,
+        "experience_match": 0.15,
+        "education_match": 0.1
+      },
+      "spearman_vs_human": 0.9463,
+      "ndcg5_vs_human": 0.9518,
+      "rank_stability_vs_default_rho": 1.0,
+      "top5_overlap_vs_default_pct": 100.0
+    },
+    "equal_25_25_25_25": {
+      "weights": {
+        "job_fit": 0.25,
+        "skill_match": 0.25,
+        "experience_match": 0.25,
+        "education_match": 0.25
+      },
+      "spearman_vs_human": 0.9527,
+      "ndcg5_vs_human": 0.9557,
+      "rank_stability_vs_default_rho": 0.9841,
+      "top5_overlap_vs_default_pct": 100.0
+    },
+    "task_heavy_50_30_10_10": {
+      "weights": {
+        "job_fit": 0.5,
+        "skill_match": 0.3,
+        "experience_match": 0.1,
+        "education_match": 0.1
+      },
+      "spearman_vs_human": 0.927,
+      "ndcg5_vs_human": 0.9429,
+      "rank_stability_vs_default_rho": 0.9856,
+      "top5_overlap_vs_default_pct": 95.0
+    },
+    "skill_heavy_30_45_15_10": {
+      "weights": {
+        "job_fit": 0.3,
+        "skill_match": 0.45,
+        "experience_match": 0.15,
+        "education_match": 0.1
+      },
+      "spearman_vs_human": 0.9516,
+      "ndcg5_vs_human": 0.9538,
+      "rank_stability_vs_default_rho": 0.995,
+      "top5_overlap_vs_default_pct": 100.0
+    },
+    "exp_heavy_35_35_20_10": {
+      "weights": {
+        "job_fit": 0.35,
+        "skill_match": 0.35,
+        "experience_match": 0.2,
+        "education_match": 0.1
+      },
+      "spearman_vs_human": 0.9475,
+      "ndcg5_vs_human": 0.9538,
+      "rank_stability_vs_default_rho": 0.9946,
+      "top5_overlap_vs_default_pct": 100.0
+    },
+    "edu_heavy_35_30_15_20": {
+      "weights": {
+        "job_fit": 0.35,
+        "skill_match": 0.3,
+        "experience_match": 0.15,
+        "education_match": 0.2
+      },
+      "spearman_vs_human": 0.9452,
+      "ndcg5_vs_human": 0.9518,
+      "rank_stability_vs_default_rho": 0.9982,
+      "top5_overlap_vs_default_pct": 100.0
+    }
+  },
+  "explainability_audit": {
+    "n_sampled_pairs": 32,
+    "supported_or_correct_count": 30,
+    "evidence_precision_pct": 93.75,
+    "audit_csv": "evaluation_results\\evidence_audit_32.csv"
+  }
+}

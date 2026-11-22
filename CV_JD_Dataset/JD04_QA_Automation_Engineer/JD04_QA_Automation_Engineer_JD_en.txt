@@ -1,0 +1,23 @@
+JOB DESCRIPTION: QA AUTOMATION ENGINEER
+Location: Hai Phong | Salary: VND 18 - 32 million | Type: Full-time
+
+RESPONSIBILITIES
+- Design test cases and build automated test suites with Selenium/Java
+- Test APIs and databases; integrate tests into the CI pipeline
+- Track and report defects; ensure quality before every release
+- Collaborate with Developers and Product Owners in Agile
+
+REQUIREMENTS
+- At least 2 years of experience in a similar role
+- Proficient in: Selenium, Java, Postman, SQL, Git, Jira
+- Good English reading skills for technical documents
+- Bachelor's degree in a relevant field
+
+NICE TO HAVE
+- Experience with: Cypress, Playwright, JMeter, CI/CD, Docker
+
+BENEFITS
+- 13th-month salary and performance bonus
+- Full social insurance and extended health insurance
+- Training and clear career path
+- 12 days annual leave, yearly company trip

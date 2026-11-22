@@ -1,0 +1,26 @@
+BÙI QUỐC HÙNG
+=============
+Vị trí ứng tuyển / Applying for: Lập trình viên Backend (Java) / Backend Developer (Java)
+Liên hệ / Contact: bui.quoc.hung@example.com | 0986 000 411 | Hải Phòng / Hai Phong
+
+MỤC TIÊU NGHỀ NGHIỆP / CAREER OBJECTIVE
+1 năm kinh nghiệm / 1 yrs exp. Ứng tuyển Lập trình viên Backend (Java) / Backend Developer (Java).
+
+KINH NGHIỆM LÀM VIỆC / WORK EXPERIENCE
+Kiểm thử phần mềm thủ công (Manual QA) / Manual QA Engineer | Công ty TNHH Dữ liệu Bắc Hà
+09/2025 - Hiện tại / Present
+  - Truy vấn SQL cơ bản để kiểm tra dữ liệu kiểm thử
+  - Reported and tracked bugs in Jira
+  - Viết và thực thi test case thủ công cho ứng dụng web
+
+DỰ ÁN / PROJECTS
+  - Đồ án tốt nghiệp: Website quản lý thư viện (Java Servlet, MySQL) / Capstone: Library management website (Java Servlet, MySQL)
+
+HỌC VẤN / EDUCATION
+  Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Công nghệ - ĐHQGHN / VNU University of Engineering and Technology (2021 - 2025)
+
+KỸ NĂNG / SKILLS
+  jQuery, Java, REST API, PHP
+
+NGOẠI NGỮ / LANGUAGES
+  Tiếng Anh / English: Cơ bản / Basic

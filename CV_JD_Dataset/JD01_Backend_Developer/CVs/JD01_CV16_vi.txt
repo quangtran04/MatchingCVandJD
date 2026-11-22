@@ -1,0 +1,25 @@
+BÙI MINH ANH
+============
+Vị trí ứng tuyển: Lập trình viên Backend (Java)
+Liên hệ: bui.minh.anh@example.com | 0931 000 776 | Hà Nội
+
+MỤC TIÊU NGHỀ NGHIỆP
+Sinh viên mới tốt nghiệp, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
+
+KINH NGHIỆM LÀM VIỆC
+Thực tập sinh - Kiểm thử phần mềm thủ công (Manual QA) | Công ty TNHH Dữ liệu Bắc Hà
+06/2025 - 12/2025
+  - Truy vấn SQL cơ bản để kiểm tra dữ liệu kiểm thử
+  - Báo cáo và theo dõi lỗi trên Jira
+
+DỰ ÁN
+  - Đồ án tốt nghiệp: Website quản lý thư viện (Java Servlet, MySQL)
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Bách khoa Hà Nội (2022 - 2026)
+
+KỸ NĂNG
+  Java, WordPress, Visual Basic
+
+NGOẠI NGỮ
+  Tiếng Anh: Cơ bản

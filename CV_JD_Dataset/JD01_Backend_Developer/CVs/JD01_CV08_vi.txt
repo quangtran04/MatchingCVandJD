@@ -1,0 +1,27 @@
+ĐẶNG VĂN HẢI
+============
+Vị trí ứng tuyển: Lập trình viên Backend (Java)
+Liên hệ: dang.van.hai@example.com | 0941 000 404 | Hải Phòng
+
+MỤC TIÊU NGHỀ NGHIỆP
+2 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
+
+KINH NGHIỆM LÀM VIỆC
+Lập trình viên Java | Công ty CP Giải pháp Sao Việt
+01/2024 - Hiện tại
+  - Tối ưu truy vấn và index MySQL, giảm 28% thời gian phản hồi trung bình
+  - Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+  - Viết unit test và integration test với JUnit, đạt độ phủ 88%
+  - Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+
+DỰ ÁN
+  - Tham gia hackathon nội bộ công ty
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Bách khoa TP.HCM (2020 - 2024)
+
+KỸ NĂNG
+  Java, MySQL, Docker, Git
+
+NGOẠI NGỮ
+  Tiếng Anh: TOEIC 800

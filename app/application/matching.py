@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
 from app.application.job_alignment import compare_job_description
@@ -19,6 +20,18 @@ from app.application.skill_matching import (
     taxonomy,
 )
 
+@dataclass(frozen=True)
+class MatchConfig:
+    """Feature flags and weights supporting ablation and sensitivity experiments."""
+
+    enable_semantic: bool = True
+    enable_one_to_one: bool = True
+    enable_job_fit: bool = True
+    enable_dynamic_weights: bool = True
+    enable_project_bonus: bool = True
+    weights: dict[str, float] | None = None
+
+
 WEIGHTS = {
     "job_fit": 0.40,
     "skill_match": 0.35,
@@ -30,14 +43,27 @@ PROJECT_BONUS_MAX = 10.0
 YEAR_PATTERN = re.compile(r"(?<!\d)(\d+(?:[.,]\d+)?)\s*\+?\s*(?:years?|yrs?|năm)\b", re.IGNORECASE)
 DATE_RANGE = re.compile(
     r"(?<!\d)(\d{1,2}/\d{4}|\d{4})\s*(?:–|—|-|to|đến)\s*"
-    r"(\d{1,2}/\d{4}|\d{4}|present|current|now|nay|hiện tại)\b",
+    r"(\d{1,2}/\d{4}|\d{4}|(?:present|current|now|nay|hiện tại)(?:\s*/\s*(?:present|current|now|nay|hiện tại))?)\b",
     re.IGNORECASE,
 )
 DEGREES = {
     "student": ("sinh viên", "student", "đang học", "undergraduate"),
-    "bachelor": ("cử nhân", "bachelor", "đại học", "university degree", "kỹ sư"),
-    "master": ("thạc sĩ", "master", "msc"),
-    "phd": ("tiến sĩ", "phd", "doctorate"),
+    "bachelor": (
+        "cử nhân",
+        "bachelor",
+        "đại học",
+        "university degree",
+        "kỹ sư",
+        "b.eng",
+        "b.sc",
+        "b.s",
+        "b.a",
+        "b.tech",
+        "beng",
+        "bsc",
+    ),
+    "master": ("thạc sĩ", "master", "msc", "m.sc", "m.s", "m.eng", "mba"),
+    "phd": ("tiến sĩ", "phd", "ph.d", "doctorate"),
 }
 DEGREE_RANK = {"student": 0, "bachelor": 1, "master": 2, "phd": 3}
 FIELDS = {
@@ -46,6 +72,8 @@ FIELDS = {
     "Artificial Intelligence": ("artificial intelligence", "trí tuệ nhân tạo"),
     "Data Science": ("data science", "khoa học dữ liệu"),
     "Software Engineering": ("software engineering", "kỹ thuật phần mềm"),
+    "Information Systems": ("information systems", "hệ thống thông tin"),
+    "Computer Engineering": ("computer engineering", "kỹ thuật máy tính"),
     "Mathematics and Computing": ("toán-tin", "toán tin"),
 }
 
@@ -82,7 +110,8 @@ def _years_from_text(lines: list[str]) -> tuple[float | None, str]:
 
 
 def _month(value: str, as_of: date, *, end_of_year: bool = False) -> int | None:
-    if value.lower() in {"present", "current", "now", "nay", "hiện tại"}:
+    lowered = value.lower()
+    if any(token in lowered for token in ("present", "current", "now", "nay", "hiện tại")):
         return as_of.year * 12 + as_of.month
     if "/" in value:
         month, year = (int(piece) for piece in value.split("/"))
@@ -150,11 +179,21 @@ def _metric(value: float | None, base_weight: float, reason: str, evidence: obje
     }
 
 
-def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = None) -> dict:
+def match_profiles(
+    cv_profile: dict,
+    jd_profile: dict,
+    *,
+    as_of: date | None = None,
+    config: MatchConfig | None = None,
+) -> dict:
     """Match extracted profiles; all scores are on a 0–100 scale or N/A."""
+    cfg = config or MatchConfig()
+    weights = {**WEIGHTS, **(cfg.weights or {})}
     as_of = as_of or datetime.now(UTC).astimezone().date()
     requirements = _as_dict(jd_profile.get("requirements"))
-    responsibility_matches = compare_job_description(cv_profile, jd_profile)
+    responsibility_matches = (
+        compare_job_description(cv_profile, jd_profile) if cfg.enable_job_fit else []
+    )
     job_fit_score = (
         sum(item["score"] for item in responsibility_matches) / len(responsibility_matches)
         if responsibility_matches
@@ -169,6 +208,18 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     required = requirements_from_lines(
         [line for line in _strings(requirements.get("mandatory_skills")) if not extra_kind(line)]
     )
+    seen_required = {
+        tuple(sorted(opt["canonical"] for opt in item["options"])) for item in required
+    }
+    for exp_req in requirements_from_lines(
+        [line for line in _strings(requirements.get("experience")) if not extra_kind(line)],
+        standalone=False,
+    ):
+        key = tuple(sorted(opt["canonical"] for opt in exp_req["options"]))
+        if key not in seen_required:
+            required.append(exp_req)
+            seen_required.add(key)
+
     preferred = requirements_from_lines(
         [
             line
@@ -195,7 +246,13 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
             cv_skills.append(mention)
             seen_cv_skills.add(key)
 
-    matched, missing = assign_skills(required, preferred, cv_skills)
+    matched, missing = assign_skills(
+        required,
+        preferred,
+        cv_skills,
+        enable_semantic=cfg.enable_semantic,
+        enable_one_to_one=cfg.enable_one_to_one,
+    )
     skill_denominator = 2 * len(required) + len(preferred)
     skill_numerator = sum(
         (2 if item["priority"] == "required" else 1) * item["confidence"] for item in matched
@@ -288,13 +345,13 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     scores = {
         "job_fit": _metric(
             job_fit_score,
-            WEIGHTS["job_fit"],
+            weights["job_fit"],
             job_fit_reason,
             {"tasks": responsibility_matches},
         ),
         "skill_match": _metric(
             skill_score,
-            WEIGHTS["skill_match"],
+            weights["skill_match"],
             skill_reason,
             {
                 "required": required,
@@ -305,7 +362,7 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
         ),
         "experience_match": _metric(
             experience_score,
-            WEIGHTS["experience_match"],
+            weights["experience_match"],
             experience_reason,
             {
                 "jd_required_years": required_years,
@@ -316,7 +373,7 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
         ),
         "education_match": _metric(
             education_score,
-            WEIGHTS["education_match"],
+            weights["education_match"],
             education_reason,
             {
                 "jd_text": jd_education_lines + jd_field_lines,
@@ -331,7 +388,7 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
         ),
         "project_relevance": _metric(
             project_score,
-            WEIGHTS["project_relevance"],
+            weights["project_relevance"],
             project_reason,
             {
                 "jd_skills": jd_skills,
@@ -343,11 +400,13 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
     active_weight = sum(
         metric["base_weight"] for metric in scores.values() if metric["score"] is not None
     )
+    total_base_weight = sum(metric["base_weight"] for metric in scores.values())
+    weight_denominator = active_weight if cfg.enable_dynamic_weights else total_base_weight
     for metric in scores.values():
-        if metric["score"] is not None and active_weight:
-            metric["effective_weight"] = round(metric["base_weight"] / active_weight, 4)
+        if metric["score"] is not None and weight_denominator:
+            metric["effective_weight"] = round(metric["base_weight"] / weight_denominator, 4)
             metric["weighted_points"] = round(
-                metric["score"] * metric["base_weight"] / active_weight, 2
+                metric["score"] * metric["base_weight"] / weight_denominator, 2
             )
     base_score = (
         round(
@@ -356,14 +415,16 @@ def match_profiles(cv_profile: dict, jd_profile: dict, *, as_of: date | None = N
                 for metric in scores.values()
                 if metric["score"] is not None
             )
-            / active_weight,
+            / weight_denominator,
             1,
         )
-        if active_weight
+        if active_weight and weight_denominator
         else None
     )
     project_bonus_points = (
-        round(PROJECT_BONUS_MAX * len(project_matches) / len(jd_skills), 2) if jd_skills else 0.0
+        round(PROJECT_BONUS_MAX * len(project_matches) / len(jd_skills), 2)
+        if (jd_skills and cfg.enable_project_bonus)
+        else 0.0
     )
     applied_bonus_points = (
         round(min(project_bonus_points, max(100 - base_score, 0)), 2)

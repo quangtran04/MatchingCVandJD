@@ -1,0 +1,27 @@
+DO DUC ANH
+==========
+Applying for: DevOps Engineer
+Contact: do.duc.anh@example.com | 0915 000 223 | Hai Phong
+
+CAREER OBJECTIVE
+2 years of experience, seeking to contribute as a DevOps Engineer.
+
+WORK EXPERIENCE
+System Engineer | Công ty TNHH Hạ tầng Số Bắc Hà
+10/2024 - Present
+  - Operated Kubernetes clusters running 74+ microservices with Docker
+  - Administered Linux servers and automated routine tasks with shell scripts
+  - Set up monitoring and alerting, reducing incident response time by 24%
+  - Built and maintained CI/CD pipelines with Jenkins/GitLab CI, cutting release time by 70%
+
+PROJECTS
+  - Personal project: Home Linux server for experiments
+
+EDUCATION
+  B.Eng. in Information Technology, Academy of Finance (2020 - 2024)
+
+SKILLS
+  AWS, Linux, Docker
+
+LANGUAGES
+  English: Professional working proficiency

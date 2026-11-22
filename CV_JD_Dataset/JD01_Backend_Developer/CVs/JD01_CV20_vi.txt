@@ -1,0 +1,34 @@
+DƯƠNG QUỐC CƯỜNG
+================
+Vị trí ứng tuyển: Lập trình viên Backend (Java)
+Liên hệ: duong.quoc.cuong@example.com | 0904 000 908 | Hà Nội
+
+MỤC TIÊU NGHỀ NGHIỆP
+6 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
+
+KINH NGHIỆM LÀM VIỆC
+Lập trình viên Backend | TechNest Vietnam Co., Ltd
+11/2024 - Hiện tại
+  - Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+  - Viết unit test và integration test với JUnit, đạt độ phủ 86%
+  - Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+  - Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 48k request/ngày
+
+Lập trình viên Java | Công ty TNHH Phần mềm Hoa Sen
+09/2022 - 02/2024
+  - Viết unit test và integration test với JUnit, đạt độ phủ 80%
+  - Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+
+Lập trình viên Java | FinTech Lạc Hồng JSC
+12/2020 - 09/2022
+  - Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 10k request/ngày
+  - Viết unit test và integration test với JUnit, đạt độ phủ 73%
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2016 - 2020)
+
+KỸ NĂNG
+  Kubernetes, Java, MySQL, Git, Redis, REST API, Spring Boot, Docker
+
+NGOẠI NGỮ
+  Tiếng Anh: TOEIC 800

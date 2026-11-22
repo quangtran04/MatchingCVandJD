@@ -1,0 +1,24 @@
+TRAN THU VY
+===========
+Applying for: QA Automation Engineer
+Contact: tran.thu.vy@example.com | 0902 000 612 | Ho Chi Minh City
+
+CAREER OBJECTIVE
+1 years of experience, seeking to contribute as a QA Automation Engineer.
+
+WORK EXPERIENCE
+Junior QA Engineer | Ngân hàng số Kim Long (Khối CNTT)
+07/2025 - Present
+  - Worked with developers and product owners in Agile/Scrum sprints
+  - Logged and tracked defects in Jira, achieving 88% defect detection before release
+  - Integrated automated tests into CI pipeline, reducing regression time by 33%
+  - Tested REST APIs with Postman and validated data with SQL queries
+
+EDUCATION
+  B.Eng. in Information Technology, National Economics University (2021 - 2025)
+
+SKILLS
+  Postman, Java, Selenium, SQL, CI/CD
+
+LANGUAGES
+  English: TOEIC 800

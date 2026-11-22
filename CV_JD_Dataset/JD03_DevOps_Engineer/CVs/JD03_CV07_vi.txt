@@ -1,0 +1,29 @@
+PHAN HỮU SƠN
+============
+Vị trí ứng tuyển: Kỹ sư DevOps
+Liên hệ: phan.huu.son@example.com | 0964 000 329 | TP. Hồ Chí Minh
+
+MỤC TIÊU NGHỀ NGHIỆP
+3 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư DevOps.
+
+KINH NGHIỆM LÀM VIỆC
+Kỹ sư DevOps | Công ty TNHH Dữ liệu Sao Mai
+03/2024 - Hiện tại
+  - Triển khai hạ tầng AWS bằng Terraform cho hơn 27 môi trường
+  - Xây dựng và duy trì pipeline CI/CD với Jenkins/GitLab CI, giảm 27% thời gian phát hành
+  - Vận hành cụm Kubernetes chạy hơn 75 microservice với Docker
+  - Thiết lập giám sát, cảnh báo, giảm 26% thời gian xử lý sự cố
+
+Kỹ sư Hệ thống | CloudBridge Vietnam
+04/2023 - 08/2024
+  - Xây dựng và duy trì pipeline CI/CD với Jenkins/GitLab CI, giảm 15% thời gian phát hành
+  - Vận hành cụm Kubernetes chạy hơn 71 microservice với Docker
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Kinh tế Quốc dân (2019 - 2023)
+
+KỸ NĂNG
+  Kubernetes, AWS, CI/CD, Docker
+
+NGOẠI NGỮ
+  Tiếng Anh: Giao tiếp tốt

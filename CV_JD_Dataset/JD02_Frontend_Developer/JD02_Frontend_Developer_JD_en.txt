@@ -1,0 +1,23 @@
+JOB DESCRIPTION: FRONTEND DEVELOPER (REACT)
+Location: Ho Chi Minh City | Salary: VND 15 - 30 million | Type: Full-time
+
+RESPONSIBILITIES
+- Develop web interfaces with React and TypeScript from UI/UX designs
+- Integrate REST APIs; optimize performance and user experience
+- Write unit tests and participate in code reviews
+- Collaborate with Backend, Design and QA teams in Agile
+
+REQUIREMENTS
+- At least 2 years of experience in a similar role
+- Proficient in: JavaScript, TypeScript, React, HTML/CSS, REST API, Git
+- Good English reading skills for technical documents
+- Bachelor's degree in a relevant field
+
+NICE TO HAVE
+- Experience with: Next.js, Redux, Jest, Tailwind CSS, Webpack
+
+BENEFITS
+- 13th-month salary and performance bonus
+- Full social insurance and extended health insurance
+- Training and clear career path
+- 12 days annual leave, yearly company trip

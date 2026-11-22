@@ -17,10 +17,23 @@ EXTRA_RULES = (
         r"(?:ai.*(?:ho tro|support).*(?:lap trinh|coding|code)|(?:copilot|cursor|codeium|tabnine))",
     ),
     ("competition", r"cuoc thi|kaggle|hackathon|competition|contest"),
-    ("project", r"du an|project"),
+    (
+        "project",
+        (
+            r"(?:^(?:da co|da tung|tung thuc hien|co)\s+(?:cac\s+)?(?:du an|project|san pham)\b"
+            r"|(?:du an ca nhan|personal project).*(?:diem cong|loi the|uu tien|plus))"
+        ),
+    ),
     (
         "work_style",
-        r"tu duy logic|chu dong|hoc hoi|ham hoc|trach nhiem|giao tiep|lam viec nhom|logical thinking|problem.solving|self.learning|responsib|initiative|communication|teamwork",
+        (
+            r"tu duy logic|tu duy phan tich|giai quyet van de|chu dong|hoc hoi|ham hoc|tu hoc|hoc nhanh|"
+            r"thich nghi|da nhiem|tinh than trach nhiem|trach nhiem|tinh than lam viec|"
+            r"giao tiep|lam viec nhom|lam viec theo nhom|lam viec doc lap|phoi hop lam viec|"
+            r"can than|ti mi|chiu duoc ap luc|san sang dam nhiem|san sang ho tro|"
+            r"logical thinking|problem.solving|self.learning|quick learner|adaptab|multitask|"
+            r"responsib|initiative|communication|teamwork|independent"
+        ),
     ),
     (
         "motivation",
@@ -38,20 +51,25 @@ CAREER_CLUE = re.compile(r"mong muốn|định hướng|career|seeking|aspiring"
 WORK_STYLE_CLUES = {
     "logic": re.compile(r"logic|logical|problem.solving|giải quyết vấn đề", re.IGNORECASE),
     "learning": re.compile(
-        r"chủ động học|tự học|ham học|eager to learn|self.learning|quick learner", re.IGNORECASE
+        r"chủ động học|tự học|ham học|học nhanh|thích nghi|eager to learn|self.learning|quick learner",
+        re.IGNORECASE,
     ),
-    "responsibility": re.compile(r"trách nhiệm|responsib|accountab", re.IGNORECASE),
+    "responsibility": re.compile(r"trách nhiệm|đa nhiệm|responsib|accountab", re.IGNORECASE),
     "teamwork": re.compile(
-        r"làm việc nhóm|phối hợp|teamwork|collaborat|communication|giao tiếp", re.IGNORECASE
+        r"làm việc nhóm|làm việc theo nhóm|làm việc độc lập|phối hợp|teamwork|collaborat|communication|giao tiếp",
+        re.IGNORECASE,
     ),
 }
 TASK_START = re.compile(
     r"^(?:[•\-–]\s*)?(?:(?:công việc hằng ngày|nhiệm vụ|trách nhiệm|công việc chính)\s*[:\-]\s*)?"
     r"(?:hỗ trợ|tham gia|xây dựng|phát triển|thiết kế|tích hợp|"
     r"nghiên cứu|triển khai|huấn luyện|đánh giá|phân tích|xử lý|viết|quản lý|"
-    r"tối ưu|lập trình|thu thập|phối hợp|build|develop|design|implement|"
+    r"tối ưu|lập trình|thu thập|phối hợp|sử dụng|kiểm thử|làm việc|thực hiện|"
+    r"vận hành|bảo trì|theo dõi|báo cáo|đảm bảo|tư vấn|đào tạo|phát hiện|hoàn thiện|"
+    r"build|develop|design|implement|"
     r"integrate|research|deploy|train|evaluate|analyze|write|manage|optimize|"
-    r"collaborate|support)\b",
+    r"collaborate|support|use|test|work|maintain|operate|monitor|"
+    r"provision|run|ensure|track|report|review|administer|automate|configure)\b",
     re.IGNORECASE,
 )
 
@@ -92,13 +110,21 @@ def _cv_sources(cv_profile: dict) -> list[dict[str, str]]:
 
 def _work_style_clue(line: str) -> re.Pattern[str] | None:
     key = _normalized(line)
-    if "logic" in key or "problem" in key:
+    if "logic" in key or "problem" in key or "giai quyet van de" in key:
         return WORK_STYLE_CLUES["logic"]
-    if "hoc" in key or "learn" in key or "chu dong" in key:
+    if "hoc" in key or "learn" in key or "chu dong" in key or "thich nghi" in key:
         return WORK_STYLE_CLUES["learning"]
-    if "trach nhiem" in key or "responsib" in key:
+    if "trach nhiem" in key or "da nhiem" in key or "responsib" in key:
         return WORK_STYLE_CLUES["responsibility"]
-    if "giao tiep" in key or "lam viec nhom" in key or "teamwork" in key or "communication" in key:
+    if (
+        "giao tiep" in key
+        or "lam viec nhom" in key
+        or "lam viec theo nhom" in key
+        or "lam viec doc lap" in key
+        or "phoi hop" in key
+        or "teamwork" in key
+        or "communication" in key
+    ):
         return WORK_STYLE_CLUES["teamwork"]
     return None
 
@@ -192,7 +218,7 @@ def compare_other_requirements(cv_profile: dict, jd_profile: dict) -> list[dict[
             seen.add(key)
             priority = (
                 "preferred"
-                if re.search(r"điểm cộng|ưu tiên|nice to have", part, re.IGNORECASE)
+                if re.search(r"điểm cộng|ưu tiên|nice to have|lợi thế", part, re.IGNORECASE)
                 else candidate["priority"]
             )
             evidence = _find_extra_evidence(kind, part, sources)

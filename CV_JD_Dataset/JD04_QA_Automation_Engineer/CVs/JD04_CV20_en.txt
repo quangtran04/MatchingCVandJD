@@ -1,0 +1,27 @@
+HOANG QUOC PHUC
+===============
+Applying for: QA Automation Engineer
+Contact: hoang.quoc.phuc@example.com | 0944 000 114 | Da Nang
+
+CAREER OBJECTIVE
+1 years of experience, seeking to contribute as a QA Automation Engineer.
+
+WORK EXPERIENCE
+Junior QA Engineer | TestPro Vietnam
+02/2025 - Present
+  - Worked with developers and product owners in Agile/Scrum sprints
+  - Developed automated UI test suites with Selenium and Java covering 16+ test cases
+  - Tested REST APIs with Postman and validated data with SQL queries
+  - Integrated automated tests into CI pipeline, reducing regression time by 31%
+
+PROJECTS
+  - Personal project: Manual test cases for an open-source app
+
+EDUCATION
+  B.Eng. in Information Technology, National Economics University (2021 - 2025)
+
+SKILLS
+  SQL, Java, CI/CD, Git, Selenium
+
+LANGUAGES
+  English: Professional working proficiency

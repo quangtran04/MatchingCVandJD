@@ -1,0 +1,38 @@
+PHAN GIA ANH
+============
+Applying for: Frontend Developer (React)
+Contact: phan.gia.anh@example.com | 0921 000 995 | Hai Phong
+
+CAREER OBJECTIVE
+6 years of experience, seeking to contribute as a Frontend Developer (React).
+
+WORK EXPERIENCE
+Senior Frontend Developer | Startup EdTech Mầm Xanh
+07/2024 - Present
+  - Integrated REST APIs and managed state with Redux/Context
+  - Wrote unit tests with Jest and React Testing Library, reaching 74% coverage
+  - Built responsive single-page applications with React and TypeScript used by 63k+ monthly users
+  - Worked closely with UI/UX designers and backend developers in Agile sprints
+
+Frontend Developer | Công ty CP Thương mại Điện tử Muôn Nơi
+11/2022 - 09/2024
+  - Improved page load time by 17% through code splitting and lazy loading
+  - Wrote unit tests with Jest and React Testing Library, reaching 84% coverage
+
+Junior Frontend Developer | Pixelwave Vietnam
+07/2020 - 08/2022
+  - Wrote unit tests with Jest and React Testing Library, reaching 73% coverage
+  - Improved page load time by 24% through code splitting and lazy loading
+
+PROJECTS
+  - Open source: contributed UI components to a React library
+  - Personal project: Kanban task board (React, TypeScript) with live demo
+
+EDUCATION
+  B.Eng. in Information Technology, VNU University of Engineering and Technology (2016 - 2020)
+
+SKILLS
+  Webpack, React, Git, HTML/CSS, REST API, JavaScript, Next.js, TypeScript
+
+LANGUAGES
+  English: TOEIC 800

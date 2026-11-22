@@ -106,7 +106,7 @@ def skills_from_lines(lines: list[str], *, standalone: bool = False) -> list[dic
     return found
 
 
-def requirements_from_lines(lines: list[str]) -> list[dict]:
+def requirements_from_lines(lines: list[str], *, standalone: bool = True) -> list[dict]:
     """Treat adjacent skills joined by 'or/hoặc' as one alternative requirement."""
     requirements: list[dict] = []
     seen: set[tuple[str, ...]] = set()
@@ -114,6 +114,7 @@ def requirements_from_lines(lines: list[str]) -> list[dict]:
         mentions = skill_mentions(line)
         if (
             not mentions
+            and standalone
             and _standalone_skill(line)
             and len(line) <= 40
             and len(tokenize(line)) <= 4
@@ -146,7 +147,9 @@ def requirements_from_lines(lines: list[str]) -> list[dict]:
     return requirements
 
 
-def match_tier(jd_skill: str, cv_skill: str) -> tuple[str, float] | None:
+def match_tier(
+    jd_skill: str, cv_skill: str, *, enable_semantic: bool = True
+) -> tuple[str, float] | None:
     """Return tier and confidence; semantic fulfilment is directional from JD to CV."""
     jd_key, cv_key = _key(jd_skill), _key(cv_skill)
     if jd_key == cv_key:
@@ -161,7 +164,7 @@ def match_tier(jd_skill: str, cv_skill: str) -> tuple[str, float] | None:
         similarity = ratio(jd_key, cv_key)
         if similarity >= 92:
             return "normalized", round(similarity / 100 * 0.9, 3)
-    if cv_canonical in taxonomy()["semantic_fulfills"].get(jd_canonical, []):
+    if enable_semantic and cv_canonical in taxonomy()["semantic_fulfills"].get(jd_canonical, []):
         return "semantic", 0.8
     return None
 
@@ -170,15 +173,18 @@ def assign_skills(
     required: list[dict[str, str]],
     preferred: list[dict[str, str]],
     cv_skills: list[dict[str, str]],
+    *,
+    enable_semantic: bool = True,
+    enable_one_to_one: bool = True,
 ) -> tuple[list[dict], list[str]]:
-    """Assign each CV skill once, prioritising required and closest matches."""
+    """Assign each CV skill once (or greedily per JD when 1-to-1 is disabled for ablation)."""
     requirements = [("required", entry) for entry in required]
     requirements.extend(("preferred", entry) for entry in preferred)
     edges = []
     for jd_index, (priority, jd) in enumerate(requirements):
         for cv_index, cv in enumerate(cv_skills):
             for option_index, option in enumerate(jd.get("options", [jd])):
-                match = match_tier(option["name"], cv["name"])
+                match = match_tier(option["name"], cv["name"], enable_semantic=enable_semantic)
                 if match:
                     tier, confidence = match
                     edges.append(
@@ -199,7 +205,9 @@ def assign_skills(
     assigned_cv: set[int] = set()
     matches = []
     for _, _, _, jd_index, cv_index, _, option, tier, confidence in edges:
-        if jd_index in assigned_jd or cv_index in assigned_cv:
+        if jd_index in assigned_jd:
+            continue
+        if enable_one_to_one and cv_index in assigned_cv:
             continue
         assigned_jd.add(jd_index)
         assigned_cv.add(cv_index)

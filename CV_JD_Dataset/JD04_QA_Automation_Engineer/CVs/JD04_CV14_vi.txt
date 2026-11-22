@@ -1,0 +1,25 @@
+NGÔ THỊ GIANG
+=============
+Vị trí ứng tuyển: Kỹ sư Kiểm thử Tự động (QA Automation)
+Liên hệ: ngo.thi.giang@example.com | 0975 000 610 | Hà Nội
+
+MỤC TIÊU NGHỀ NGHIỆP
+Sinh viên mới tốt nghiệp, mong muốn đóng góp ở vị trí Kỹ sư Kiểm thử Tự động (QA Automation).
+
+KINH NGHIỆM LÀM VIỆC
+Thực tập sinh - Nhân viên hỗ trợ kỹ thuật phần mềm | Ngân hàng số Kim Long (Khối CNTT)
+06/2025 - 12/2025
+  - Tái hiện lỗi người dùng báo và chuyển lên developer
+  - Soạn hướng dẫn sử dụng và FAQ
+
+DỰ ÁN
+  - Đồ án: Kiểm thử website đặt vé (test case thủ công)
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Hàng hải Việt Nam (2022 - 2026)
+
+KỸ NĂNG
+  Selenium, PHP, WordPress
+
+NGOẠI NGỮ
+  Tiếng Anh: Cơ bản

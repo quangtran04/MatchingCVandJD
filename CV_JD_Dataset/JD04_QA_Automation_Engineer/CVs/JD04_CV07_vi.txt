@@ -1,0 +1,29 @@
+LÊ BẢO YẾN
+==========
+Vị trí ứng tuyển: Kỹ sư Kiểm thử Tự động (QA Automation)
+Liên hệ: le.bao.yen@example.com | 0971 000 331 | Đà Nẵng
+
+MỤC TIÊU NGHỀ NGHIỆP
+4 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư Kiểm thử Tự động (QA Automation).
+
+KINH NGHIỆM LÀM VIỆC
+Kỹ sư kiểm thử tự động | Công ty CP Công nghệ Rồng Xanh
+05/2024 - Hiện tại
+  - Kiểm thử REST API bằng Postman và xác thực dữ liệu bằng SQL
+  - Xây dựng bộ test tự động UI bằng Selenium và Java với hơn 35 test case
+  - Phối hợp với developer và product owner theo Agile/Scrum
+  - Ghi nhận và theo dõi lỗi trên Jira, phát hiện 88% lỗi trước khi phát hành
+
+Kỹ sư kiểm thử | Công ty TNHH Giải pháp Sao Việt
+09/2022 - 04/2024
+  - Phối hợp với developer và product owner theo Agile/Scrum
+  - Xây dựng bộ test tự động UI bằng Selenium và Java với hơn 47 test case
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Hàng hải Việt Nam (2018 - 2022)
+
+KỸ NĂNG
+  Postman, Jira, Java, Docker, Cypress, Selenium, JMeter, SQL, Git
+
+NGOẠI NGỮ
+  Tiếng Anh: TOEIC 800

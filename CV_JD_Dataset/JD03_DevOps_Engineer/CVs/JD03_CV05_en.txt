@@ -1,0 +1,25 @@
+LE BAO NGAN
+===========
+Applying for: DevOps Engineer
+Contact: le.bao.ngan@example.com | 0970 000 986 | Da Nang
+
+CAREER OBJECTIVE
+Recent graduate, seeking to contribute as a DevOps Engineer.
+
+WORK EXPERIENCE
+Intern - IT Helpdesk Technician | Ngân hàng TMCP Đại Phát (Khối CNTT)
+06/2025 - 12/2025
+  - Managed user accounts in Active Directory
+  - Installed and configured Windows PCs and office software
+
+PROJECTS
+  - Capstone: Building a LAN for a small business
+
+EDUCATION
+  B.Eng. in Information Technology, VNU University of Engineering and Technology (2022 - 2026)
+
+SKILLS
+  WordPress, AWS, Visual Basic
+
+LANGUAGES
+  English: Reading comprehension

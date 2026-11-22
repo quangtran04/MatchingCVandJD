@@ -10,14 +10,16 @@ from app.application.skill_matching import match_tier, skill_mentions
 
 ACTION_PATTERNS = {
     "research": r"nghien cuu|thu nghiem|research|experiment|explor|investigat",
-    "build": r"xay dung|phat trien|lap trinh|thiet ke|build|built|develop|implement|creat|design",
+    "build": r"xay dung|phat trien|lap trinh|thiet ke|build|built|develop|implement|creat|design|automate|automated",
     "train": r"huan luyen|fine tuning|finetun|train",
     "integrate": r"tich hop|ket noi|integrat|connect",
-    "data": r"thu thap|tien xu ly|xu ly du lieu|preprocess|data processing|prepare data|parsing|chunking",
-    "evaluate": r"danh gia|kiem thu|test|evaluat|benchmark",
-    "deploy": r"trien khai|van hanh|deploy|operat",
+    "data": r"thu thap|tien xu ly|xu ly du lieu|preprocess|data processing|prepare data|parsing|chunking|truy van|query|queries|index",
+    "evaluate": r"danh gia|kiem thu|review|test|evaluat|benchmark|track|defect|bug|quality|chat luong|bao dam|dam bao|ensure",
+    "deploy": r"trien khai|van hanh|quan tri|dong goi|thiet lap|deploy|operat|provision|administer|run|running|manage|set up|setup|bao tri|maintain",
+    "optimize": r"toi uu|hieu nang|optimi[zs]|performance|reduc|giam|improv|nang cao|bao mat|security|san sang|availability|on dinh",
+    "monitor": r"giam sat|canh bao|su co|monitor|alert|incident|observab",
     "document": r"viet tai lieu|bao cao|document|report",
-    "collaborate": r"phoi hop|lam viec nhom|collaborat|teamwork",
+    "collaborate": r"phoi hop|lam viec nhom|collaborat|teamwork|agile|scrum",
 }
 CONTENT_STOPWORDS = {
     "and",

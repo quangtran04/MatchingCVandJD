@@ -1,0 +1,27 @@
+HOÀNG HỒNG ANH
+==============
+Vị trí ứng tuyển: Lập trình viên Backend (Java)
+Liên hệ: hoang.hong.anh@example.com | 0913 000 123 | Hà Nội
+
+MỤC TIÊU NGHỀ NGHIỆP
+2 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
+
+KINH NGHIỆM LÀM VIỆC
+Lập trình viên Java | Công ty TNHH Dữ liệu Bắc Hà
+04/2024 - Hiện tại
+  - Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+  - Viết unit test và integration test với JUnit, đạt độ phủ 86%
+  - Tối ưu truy vấn và index MySQL, giảm 42% thời gian phản hồi trung bình
+  - Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 57k request/ngày
+
+DỰ ÁN
+  - Dự án cá nhân: Ứng dụng ghi chú đơn giản (Java)
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2020 - 2024)
+
+KỸ NĂNG
+  AWS, MySQL, Git, Java
+
+NGOẠI NGỮ
+  Tiếng Anh: TOEIC 800

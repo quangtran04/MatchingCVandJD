@@ -1,0 +1,37 @@
+ĐỖ THỊ LINH
+===========
+Vị trí ứng tuyển: Lập trình viên Frontend (React)
+Liên hệ: do.thi.linh@example.com | 0923 000 268 | TP. Hồ Chí Minh
+
+MỤC TIÊU NGHỀ NGHIỆP
+7 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Frontend (React).
+
+KINH NGHIỆM LÀM VIỆC
+Senior Frontend Developer | Công ty CP Thương mại Điện tử Muôn Nơi
+08/2023 - Hiện tại
+  - Cải thiện 18% thời gian tải trang nhờ code splitting và lazy loading
+  - Tích hợp REST API và quản lý state bằng Redux/Context
+  - Xây dựng ứng dụng single-page responsive bằng React và TypeScript phục vụ hơn 80k người dùng/tháng
+  - Phối hợp chặt chẽ với UI/UX designer và backend developer theo Agile
+
+Lập trình viên Frontend | Công ty TNHH Phần mềm Ánh Dương
+07/2021 - 02/2023
+  - Viết unit test với Jest và React Testing Library, đạt độ phủ 86%
+  - Phối hợp chặt chẽ với UI/UX designer và backend developer theo Agile
+
+Lập trình viên Frontend | Startup EdTech Mầm Xanh
+02/2019 - 12/2021
+  - Phối hợp chặt chẽ với UI/UX designer và backend developer theo Agile
+  - Xây dựng ứng dụng single-page responsive bằng React và TypeScript phục vụ hơn 42k người dùng/tháng
+
+DỰ ÁN
+  - Dự án cá nhân: Trang thời tiết gọi REST API công khai (React, JavaScript)
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Ngoại thương (2015 - 2019)
+
+KỸ NĂNG
+  REST API, Jest, JavaScript, HTML/CSS, TypeScript, Git, React, Webpack
+
+NGOẠI NGỮ
+  Tiếng Anh: TOEIC 800
