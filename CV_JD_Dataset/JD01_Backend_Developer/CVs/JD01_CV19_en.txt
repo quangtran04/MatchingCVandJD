@@ -1,24 +1,24 @@
-LE THANH HAI
-============
+BUI QUOC TUAN
+=============
 Applying for: Backend Developer (Java)
-Contact: le.thanh.hai@example.com | 0919 000 319 | Da Nang
+Contact: bui.quoc.tuan@example.com | 0997 000 704 | Hanoi
 
 CAREER OBJECTIVE
-1 years of experience, seeking to contribute as a Backend Developer (Java).
+2 years of experience, seeking to contribute as a Backend Developer (Java).
 
-WORK EXPERIENCE
+TECH STACK
+  REST API, Java, Git, Docker, Kafka
+
+EMPLOYMENT HISTORY
 Java Developer | Công ty TNHH Phần mềm Hoa Sen
-09/2025 - Present
+09/2024 - Present
   - Containerized services with Docker and set up CI/CD pipelines
   - Collaborated with frontend and QA teams in Agile/Scrum sprints
-  - Wrote unit and integration tests with JUnit, reaching 87% coverage
   - Optimized MySQL queries and indexes, reducing average response time by 34%
+  - Designed and developed RESTful APIs with Java and Spring Boot serving 55k+ daily requests
 
 EDUCATION
-  B.Eng. in Information Technology, VNU University of Engineering and Technology (2021 - 2025)
-
-SKILLS
-  Spring Boot, REST API, MySQL, Docker
+  B.Eng. in Information Technology, Duy Tan University (2020 - 2024)
 
 LANGUAGES
-  English: Professional working proficiency
+  English: IELTS 6.5

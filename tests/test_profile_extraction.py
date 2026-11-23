@@ -60,3 +60,83 @@ DỰÁN
     assert len(profile["projects"]) == 2
     assert profile["projects"][0]["date"] == "2026"
     assert "Hệ thống hỏi đáp tài liệu sử dụng RAG" in profile["projects"][1]["title"]
+
+
+def test_extracts_diverse_layouts_markdown_ascii_box_and_date_first() -> None:
+    ascii_box_cv = """+------------------------------------------------------------+
+| NGUYỄN THỊ MAI                                             |
+| Backend Developer (Java)                                   |
++------------------------------------------------------------+
+  nguyen.thi.mai@example.com  /  0991 000 495  /  Đà Nẵng
+
+[ CÔNG NGHỆ / TECH STACK ]
+    Java  ·  Spring Boot  ·  Docker  ·  REST API
+
+[ KINH NGHIỆM / EMPLOYMENT HISTORY ]
+> Backend Developer @ Công ty ABC (02/2024 - Hiện tại / Present)
+    • Xây dựng RESTful API với Spring Boot
+
+[ DỰ ÁN NỔI BẬT ]
+ * Hệ thống quản lý kho hàng
+"""
+    p1 = extract_cv_profile(ascii_box_cv)
+    assert p1["personal_info"]["name"] == "NGUYỄN THỊ MAI"
+    assert p1["personal_info"]["email"] == "nguyen.thi.mai@example.com"
+    assert p1["personal_info"]["location"] == "Đà Nẵng"
+    assert p1["skills"] == ["Java", "Spring Boot", "Docker", "REST API"]
+    assert len(p1["experience"]) == 1
+    assert p1["experience"][0]["date"] == "02/2024 - Hiện tại / Present"
+    assert len(p1["projects"]) == 1
+
+    markdown_cv = """# Ngô Thành Hùng
+**Vị trí ứng tuyển:** Backend Developer
+ngo.hung@example.com | 0979 000 740 | Hải Phòng
+
+## Kinh nghiệm
+### Backend Developer — Công ty Bắc Hà
+*07/2024 - Hiện tại / Present*
+- Đóng gói dịch vụ bằng Docker
+
+## Công nghệ / Tech stack
+- AWS · MySQL · Spring Boot
+"""
+    p2 = extract_cv_profile(markdown_cv)
+    assert p2["personal_info"]["name"] == "Ngô Thành Hùng"
+    assert p2["skills"] == ["AWS", "MySQL", "Spring Boot"]
+    assert len(p2["experience"]) == 1
+    assert p2["experience"][0]["title"] == "Backend Developer — Công ty Bắc Hà"
+    assert p2["experience"][0]["date"] == "07/2024 - Hiện tại / Present"
+
+    date_first_cv = """Phan Ngoc Linh
+Backend Developer
+phan.linh@example.com | 0917 000 577 | Hai Phong
+
+WORK EXPERIENCE
+01/2023 - Present
+Senior Backend Developer
+Công ty Sao Việt
+• Designed RESTful APIs
+05/2018 - 07/2020
+Java Developer
+Công ty Bắc Hà
+• Wrote unit tests
+"""
+    p3 = extract_cv_profile(date_first_cv)
+    assert len(p3["experience"]) == 2
+    assert p3["experience"][0]["date"] == "01/2023 - Present"
+    assert "Senior Backend Developer" in p3["experience"][0]["title"]
+    assert p3["experience"][1]["date"] == "05/2018 - 07/2020"
+
+
+def test_merges_wrapped_bilingual_education_entry() -> None:
+    cv = """NGUYỄN VĂN A
+HỌC VẤN / EDUCATION
+Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Bách khoa Hà Nội / Hanoi
+University of Science and Technology (2020 - 2024)
+"""
+    prof = extract_cv_profile(cv)
+    assert len(prof["education"]) == 1
+    assert "Hanoi University of Science and Technology" in prof["education"][0]["title"]
+    assert prof["education"][0]["date"] == "2020 - 2024"
+
+

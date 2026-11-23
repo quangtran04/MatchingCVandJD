@@ -1,0 +1,29 @@
+PHAN PHUONG TRANG
+=================
+Applying for: DevOps Engineer
+Contact: phan.phuong.trang@example.com | 0918 000 756 | Ho Chi Minh City
+
+ABOUT ME
+3 years of experience, seeking to contribute as a DevOps Engineer.
+
+ACADEMIC BACKGROUND
+  B.Eng. in Information Technology, University of Economics HCMC (2019 - 2023)
+
+WORK EXPERIENCE
+DevOps Engineer | Ngân hàng TMCP Đại Phát (Khối CNTT)
+08/2024 - Present
+  - Provisioned AWS infrastructure using Terraform across 39+ environments
+  - Set up monitoring and alerting, reducing incident response time by 28%
+  - Operated Kubernetes clusters running 84+ microservices with Docker
+  - Administered Linux servers and automated routine tasks with shell scripts
+
+System Engineer | Công ty TNHH Dữ liệu Sao Mai
+06/2023 - 02/2024
+  - Administered Linux servers and automated routine tasks with shell scripts
+  - Operated Kubernetes clusters running 78+ microservices with Docker
+
+TECH STACK
+  Terraform, AWS, Kubernetes
+
+LANGUAGE SKILLS
+  English: TOEIC 800

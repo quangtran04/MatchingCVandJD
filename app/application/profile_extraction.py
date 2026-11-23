@@ -35,12 +35,19 @@ SECTION_ALIASES = {
         "skills",
         "technical skills",
         "core skills",
+        "tech stack",
+        "technologies",
+        "skills and technologies",
         "competencies",
         "competences",
         "habilidades",
         "fahigkeiten",
         "ky nang",
         "ky nang chuyen mon",
+        "ky nang ky thuat",
+        "ky nang va cong nghe",
+        "cong nghe",
+        "cong nghe su dung",
         "nang luc",
         "ky nang lam viec",
     },
@@ -77,12 +84,19 @@ SECTION_ALIASES = {
         "projects",
         "project experience",
         "selected projects",
+        "personal projects",
+        "featured projects",
+        "notable projects",
+        "side projects",
         "projets",
         "proyectos",
         "projekte",
         "du an",
         "kinh nghiem du an",
         "du an ca nhan",
+        "du an noi bat",
+        "du an tieu bieu",
+        "du an thuc te",
         "cac du an",
     },
     "certificates": {
@@ -145,7 +159,11 @@ DATE_PATTERN = re.compile(
     r"|^(?:\d{1,2}[/.\-])?\d{4}(?:\s*\([^)]*\))?$)",
     re.IGNORECASE,
 )
-ADDRESS_PATTERN = re.compile(r"(?:địa chỉ|dia chi|address)\s*[:\-]\s*(.+)", re.IGNORECASE)
+ADDRESS_PATTERN = re.compile(
+    r"(?:địa chỉ|dia chi|địa điểm|dia diem|address|location)\s*[:\-]\s*(.+)", re.IGNORECASE
+)
+DIVIDER_LINE_PATTERN = re.compile(r"^[\s+\-=_~*#|]{3,}$")
+BULLET_PREFIX_PATTERN = re.compile(r"^(?:[•\-–—*+>]\s+|#+\s+)")
 
 ICON_NOISE_PATTERN = re.compile(r"(?:^|(?<=\s))[⋄◆◇❖♦✦✧∙‣➤▪▫○●]\S*\s*")
 
@@ -216,6 +234,8 @@ def _split_sections(text: str) -> tuple[dict[str, str], str]:
     preamble: list[str] = []
     current: str | None = None
     for line in text.splitlines():
+        if DIVIDER_LINE_PATTERN.fullmatch(line.strip()):
+            continue
         heading = _section_for_heading(line)
         if heading:
             current = heading
@@ -231,15 +251,24 @@ def _collapse(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
 
 
+def _strip_markdown(value: str) -> str:
+    value = re.sub(r"\*\*(.+?)\*\*|__(.+?)__", r"\1\2", value)
+    return re.sub(r"(?<!\w)\*([^*\n]+?)\*(?!\w)", r"\1", value)
+
+
+def _strip_bullet(value: str) -> str:
+    return BULLET_PREFIX_PATTERN.sub("", value.strip()).strip()
+
+
 def _merge_skill_lines(section: str) -> list[str]:
     merged: list[str] = []
     raw_lines = [line.strip() for line in section.splitlines() if line.strip()]
     has_structure = any(
-        line.startswith(("•", "-", "–")) or ":" in line for line in raw_lines
+        bool(BULLET_PREFIX_PATTERN.match(line)) or ":" in line for line in raw_lines
     )
     for raw_line in raw_lines:
-        is_bullet = raw_line.startswith(("•", "-", "–"))
-        clean = raw_line.lstrip("•-– ").strip()
+        is_bullet = bool(BULLET_PREFIX_PATTERN.match(raw_line))
+        clean = _strip_markdown(_strip_bullet(raw_line))
         if not clean:
             continue
         if not is_bullet and ":" not in clean and _is_skill_heading(clean):
@@ -252,7 +281,7 @@ def _merge_skill_lines(section: str) -> list[str]:
                 has_structure
                 or clean.startswith("(")
                 or clean[0].islower()
-                or merged[-1].endswith((",", ";", "|", ":"))
+                or merged[-1].endswith((",", ";", "|", ":", "·"))
             )
         ):
             merged[-1] = f"{merged[-1]} {clean}"
@@ -274,15 +303,15 @@ def _extract_skills(section: str) -> list[str]:
     for clean in _merge_skill_lines(section):
         if ":" in clean:
             prefix, clean = clean.split(":", 1)
-            prefix = prefix.strip(" .•-–")
+            prefix = prefix.strip(" .•-–*·")
             clean = clean.strip()
             if prefix and not _is_generic_skill_category(prefix):
-                for part in re.split(r"[,;|&]", prefix):
-                    part = part.strip(" .•-–")
+                for part in re.split(r"[,;|&·•]", prefix):
+                    part = part.strip(" .•-–*·")
                     if part and len(part) > 1 and not _is_skill_heading(part):
                         skills.append(part)
-        for item in re.split(r"[,;|]", clean):
-            item = item.strip(" .•-–")
+        for item in re.split(r"[,;|·•]", clean):
+            item = item.strip(" .•-–*·")
             if item.startswith("(") and skills:
                 skills[-1] = f"{skills[-1]} {item}"
                 continue
@@ -301,25 +330,119 @@ def _extract_skills(section: str) -> list[str]:
 def _is_skill_heading(value: str) -> bool:
     key = _normalize_key(value)
     compact = key.replace(" ", "")
-    headings = {"technical skills", "language", "tools", "other", "ky nang", "ky nang chuyen mon"}
+    headings = {
+        "technical skills",
+        "tech stack",
+        "cong nghe",
+        "language",
+        "tools",
+        "other",
+        "ky nang",
+        "ky nang chuyen mon",
+    }
     return key in headings or compact in {item.replace(" ", "") for item in headings}
+
+
+def _is_standalone_date_line(line: str) -> bool:
+    clean = _strip_markdown(_strip_bullet(line)).strip("() *_")
+    return bool(clean and DATE_PATTERN.fullmatch(clean))
+
+
+def _extract_inline_date(title: str) -> tuple[str, str]:
+    match = DATE_PATTERN.search(title)
+    if not match:
+        return title, ""
+    date_str = match.group(0).strip("() ")
+    before = title[: match.start()].strip(" \t|•-–—(")
+    after = title[match.end() :].strip(" \t|•-–—)")
+    cleaned = _collapse(f"{before} {after}".strip())
+    return (cleaned or title), date_str
+
+
+def _merge_wrapped_education_lines(lines: list[str]) -> list[str]:
+    merged: list[str] = []
+    for line in lines:
+        if (
+            merged
+            and not BULLET_PREFIX_PATTERN.match(line)
+            and not _is_standalone_date_line(line)
+            and not DATE_PATTERN.search(merged[-1])
+            and (
+                merged[-1].endswith(("/", ",", "-", "–"))
+                or (
+                    "/" in merged[-1]
+                    and bool(
+                        re.search(
+                            r"university|college|academy|institute|school",
+                            line,
+                            re.IGNORECASE,
+                        )
+                    )
+                    and not re.search(r"đại học|học viện|cao đẳng", line, re.IGNORECASE)
+                )
+            )
+        ):
+            merged[-1] = f"{merged[-1]} {line}"
+        else:
+            merged.append(line)
+    return merged
 
 
 def _extract_entries(section: str, kind: str) -> list[dict[str, str]]:
     lines = [line.strip() for line in section.splitlines() if line.strip()]
     if not lines:
         return []
-    starts = [index for index, line in enumerate(lines) if _looks_like_entry_start(line, kind)]
+    if kind == "education":
+        lines = _merge_wrapped_education_lines(lines)
+
+    if kind == "experience" and _is_standalone_date_line(lines[0]):
+        starts = [idx for idx, line in enumerate(lines) if _is_standalone_date_line(line)]
+    else:
+        starts = [index for index, line in enumerate(lines) if _looks_like_entry_start(line, kind)]
+        if kind == "project" and not starts:
+            bullet_starts = [
+                idx for idx, line in enumerate(lines) if bool(BULLET_PREFIX_PATTERN.match(line))
+            ]
+            if bullet_starts:
+                starts = bullet_starts
+
     if not starts:
-        entries = [{"title": lines[0], "details": _collapse(" ".join(lines[1:]))}]
-        return _unique_entries(entries)
+        title, inline_date = _extract_inline_date(_strip_markdown(_strip_bullet(lines[0])))
+        entry = {"title": title, "details": _collapse(" ".join(_strip_bullet(l) for l in lines[1:]))}
+        if inline_date:
+            entry["date"] = inline_date
+        return _unique_entries([entry])
+
     starts.append(len(lines))
     entries = []
     for start, end in pairwise(starts):
         block = lines[start:end]
-        title = block[0].lstrip("•-– ")
-        date = next((line for line in block[1:] if DATE_PATTERN.search(line)), "")
-        details = [line.lstrip("•-– ") for line in block[1:] if line != date]
+        if kind == "experience" and _is_standalone_date_line(block[0]) and len(block) >= 2:
+            date = _strip_markdown(_strip_bullet(block[0])).strip("() ")
+            header_parts: list[str] = []
+            detail_start = 1
+            for idx in range(1, min(len(block), 3)):
+                raw_line = block[idx]
+                if BULLET_PREFIX_PATTERN.match(raw_line):
+                    break
+                if len(raw_line) > 95 and header_parts:
+                    break
+                header_parts.append(_strip_markdown(raw_line))
+                detail_start = idx + 1
+                if "," in raw_line or " — " in raw_line or " | " in raw_line or " @ " in raw_line:
+                    break
+            title = " | ".join(header_parts) if header_parts else _strip_markdown(block[1])
+            details = [_strip_markdown(_strip_bullet(line)) for line in block[detail_start:]]
+        else:
+            raw_title = _strip_markdown(_strip_bullet(block[0]))
+            title, inline_date = _extract_inline_date(raw_title)
+            date_line = next((line for line in block[1:] if _is_standalone_date_line(line)), "")
+            if not date_line:
+                date_line = next((line for line in block[1:] if DATE_PATTERN.search(line)), "")
+            date = _strip_markdown(_strip_bullet(date_line)).strip("() ") if date_line else inline_date
+            details = [
+                _strip_markdown(_strip_bullet(line)) for line in block[1:] if line != date_line
+            ]
         entry = {"title": title, "details": _collapse(" ".join(details))}
         if date:
             entry["date"] = date
@@ -328,16 +451,24 @@ def _extract_entries(section: str, kind: str) -> list[dict[str, str]]:
 
 
 def _looks_like_entry_start(line: str, kind: str) -> bool:
-    clean = line.lstrip("• ").strip()
+    clean = _strip_markdown(_strip_bullet(line))
     if kind == "project":
         return (
-            line.startswith("•")
+            line.startswith(("•", "* ", "> "))
             or " | " in clean
             or (" - " in clean and not clean.lower().startswith("technologies"))
         )
     if kind == "experience":
-        if DATE_PATTERN.search(clean):
+        if _is_standalone_date_line(line):
             return False
+        if line.startswith(("### ", "> ")):
+            return True
+        if DATE_PATTERN.search(clean):
+            without_date = DATE_PATTERN.sub("", clean)
+            if not re.search(r"[A-Za-zÀ-ỹ]{3,}", without_date):
+                return False
+            if not ("—" in clean or " - " in clean or " @ " in clean or " | " in clean):
+                return False
         return (
             "—" in clean
             or " - " in clean
@@ -354,17 +485,28 @@ def _looks_like_entry_start(line: str, kind: str) -> bool:
 
 
 def _extract_bullets(section: str) -> list[str]:
-    values = [_collapse(line.lstrip("•-– ")) for line in section.splitlines() if line.strip()]
+    values = [
+        _collapse(_strip_markdown(_strip_bullet(line)))
+        for line in section.splitlines()
+        if line.strip() and not DIVIDER_LINE_PATTERN.fullmatch(line.strip())
+    ]
     return _unique(value for value in values if value)
 
 
 def _extract_personal_info(preamble: str) -> dict[str, str]:
-    lines = [
-        ICON_NOISE_PATTERN.sub(" ", line).strip()
-        for line in preamble.splitlines()
-        if line and not re.fullmatch(r"[=\-_~*#]{3,}", line.strip())
-    ]
-    lines = [line for line in lines if line]
+    lines: list[str] = []
+    for raw in preamble.splitlines():
+        if DIVIDER_LINE_PATTERN.fullmatch(raw.strip()):
+            continue
+        cleaned = ICON_NOISE_PATTERN.sub(" ", raw).strip()
+        # Strip ASCII box side borders and markdown heading/bold markers
+        if cleaned.startswith("|") and cleaned.endswith("|"):
+            cleaned = cleaned.strip("| ").strip()
+        cleaned = re.sub(r"^#+\s*", "", cleaned).strip()
+        cleaned = _strip_markdown(cleaned).strip()
+        if cleaned and not DIVIDER_LINE_PATTERN.fullmatch(cleaned):
+            lines.append(cleaned)
+
     joined = " ".join(lines)
     emails = EMAIL_PATTERN.findall(joined)
     phones = [
@@ -374,12 +516,16 @@ def _extract_personal_info(preamble: str) -> dict[str, str]:
     ]
     info: dict[str, str] = {}
     if lines:
-        info["name"] = lines[0].strip("• ")
-    if len(lines) > 1 and not EMAIL_PATTERN.search(lines[1]):
+        info["name"] = lines[0].strip("•| ")
+    if len(lines) > 1 and not EMAIL_PATTERN.search(lines[1]) and not re.match(
+        r"^(?:email|điện thoại|phone|liên hệ|contact|địa chỉ|địa điểm|address|location)\s*[:\-]",
+        lines[1],
+        re.IGNORECASE,
+    ):
         headline = re.sub(
             r"^(?:vị trí ứng tuyển|applying for|position|role)(?:\s*/\s*(?:applying for|vị trí ứng tuyển))?\s*[:\-]\s*",
             "",
-            lines[1].strip("• "),
+            lines[1].strip("•| "),
             flags=re.IGNORECASE,
         )
         info["headline"] = headline.strip()
@@ -393,7 +539,7 @@ def _extract_personal_info(preamble: str) -> dict[str, str]:
         info["location"] = _collapse(address_match.group(1))
     else:
         location_match = re.search(
-            r"(?:hà nội|ha noi|hanoi|tp\.?\s*hcm|hồ chí minh|ho chi minh|đà nẵng|da nang|hải phòng|hai phong|cần thơ|can tho)"
+            r"(?:hà nội|ha noi|hanoi|tp\.?\s*hcm|tp\.?\s*hồ chí minh|hồ chí minh|ho chi minh|đà nẵng|da nang|hải phòng|hai phong|cần thơ|can tho)"
             r"(?:\s+(?:city|thành phố))?(?:\s*,\s*(?:viet nam|vietnam))?",
             joined,
             re.IGNORECASE,

@@ -1,0 +1,24 @@
+VŨ BẢO DUNG
+===========
+Vị trí ứng tuyển: Kỹ sư Kiểm thử Tự động (QA Automation)
+Liên hệ: vu.bao.dung@example.com | 0978 000 561 | Hải Phòng
+
+MỤC TIÊU NGHỀ NGHIỆP
+1 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư Kiểm thử Tự động (QA Automation).
+
+KINH NGHIỆM
+Kỹ sư kiểm thử | Công ty TNHH Logistics Nhanh (IT)
+12/2025 - Hiện tại
+  - Ghi nhận và theo dõi lỗi trên Jira, phát hiện 85% lỗi trước khi phát hành
+  - Tích hợp test tự động vào pipeline CI, giảm 32% thời gian regression
+  - Kiểm thử REST API bằng Postman và xác thực dữ liệu bằng SQL
+  - Phối hợp với developer và product owner theo Agile/Scrum
+
+HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Kinh tế Quốc dân (2021 - 2025)
+
+KỸ NĂNG
+  Postman, Jira, Selenium
+
+NGOẠI NGỮ
+  Tiếng Anh: IELTS 6.5

@@ -1,26 +1,32 @@
-BÙI QUỐC HÙNG
-=============
-Vị trí ứng tuyển / Applying for: Lập trình viên Backend (Java) / Backend Developer (Java)
-Liên hệ / Contact: bui.quoc.hung@example.com | 0986 000 411 | Hải Phòng / Hai Phong
++------------------------------------------------------------+
+| NGUYỄN THỊ MAI                                             |
+| Lập trình viên Backend (Java) / Backend Developer (Java)   |
++------------------------------------------------------------+
+  nguyen.thi.mai@example.com  /  0991 000 495  /  Đà Nẵng / Da Nang
 
-MỤC TIÊU NGHỀ NGHIỆP / CAREER OBJECTIVE
-1 năm kinh nghiệm / 1 yrs exp. Ứng tuyển Lập trình viên Backend (Java) / Backend Developer (Java).
+[ TÓM TẮT / PROFESSIONAL SUMMARY ]
 
-KINH NGHIỆM LÀM VIỆC / WORK EXPERIENCE
-Kiểm thử phần mềm thủ công (Manual QA) / Manual QA Engineer | Công ty TNHH Dữ liệu Bắc Hà
-09/2025 - Hiện tại / Present
-  - Truy vấn SQL cơ bản để kiểm tra dữ liệu kiểm thử
-  - Reported and tracked bugs in Jira
-  - Viết và thực thi test case thủ công cho ứng dụng web
+    3 năm kinh nghiệm / 3 yrs exp. Ứng tuyển Lập trình viên Backend (Java) / Backend Developer (Java).
 
-DỰ ÁN / PROJECTS
-  - Đồ án tốt nghiệp: Website quản lý thư viện (Java Servlet, MySQL) / Capstone: Library management website (Java Servlet, MySQL)
+[ KỸ NĂNG CHUYÊN MÔN / TECHNICAL SKILLS ]
 
-HỌC VẤN / EDUCATION
-  Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Công nghệ - ĐHQGHN / VNU University of Engineering and Technology (2021 - 2025)
+    Visual Basic  ·  Git  ·  jQuery  ·  REST API
 
-KỸ NĂNG / SKILLS
-  jQuery, Java, REST API, PHP
+[ KINH NGHIỆM / EMPLOYMENT HISTORY ]
 
-NGOẠI NGỮ / LANGUAGES
-  Tiếng Anh / English: Cơ bản / Basic
+> Kiểm thử phần mềm thủ công (Manual QA) / Manual QA Engineer @ Công ty TNHH Phần mềm Hoa Sen (02/2024 - Hiện tại / Present)
+    • Báo cáo và theo dõi lỗi trên Jira
+    • Wrote and executed manual test cases for web applications
+    • Truy vấn SQL cơ bản để kiểm tra dữ liệu kiểm thử
+
+> Kiểm thử phần mềm thủ công (Manual QA) / Manual QA Engineer @ Công ty CP Giải pháp Sao Việt (01/2023 - 12/2024)
+    • Viết và thực thi test case thủ công cho ứng dụng web
+    • Basic SQL queries for test data verification
+
+[ HỌC VẤN / EDUCATION ]
+
+    Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Hàng hải Việt Nam / Vietnam Maritime University (2019 - 2023)
+
+[ NGOẠI NGỮ / LANGUAGES ]
+
+    Tiếng Anh / English: Cơ bản / Basic

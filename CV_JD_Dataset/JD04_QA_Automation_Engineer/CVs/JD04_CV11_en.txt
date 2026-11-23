@@ -1,0 +1,33 @@
++--------------------------+
+| TRAN KHANH HANH          |
+| QA Automation Engineer   |
++--------------------------+
+  tran.khanh.hanh@example.com  /  0972 000 208  /  Da Nang
+
+[ ABOUT ME ]
+
+    1 years of experience, seeking to contribute as a QA Automation Engineer.
+
+[ SKILLS ]
+
+    Selenium  ·  Jira  ·  Java
+
+[ EMPLOYMENT HISTORY ]
+
+> Junior QA Engineer @ TestPro Vietnam (06/2025 - Present)
+    • Integrated automated tests into CI pipeline, reducing regression time by 25%
+    • Worked with developers and product owners in Agile/Scrum sprints
+    • Logged and tracked defects in Jira, achieving 85% defect detection before release
+    • Developed automated UI test suites with Selenium and Java covering 89+ test cases
+
+[ SELECTED PROJECTS ]
+
+    • Personal project: Manual test cases for an open-source app
+
+[ ACADEMIC BACKGROUND ]
+
+    B.Eng. in Information Technology, Duy Tan University (2021 - 2025)
+
+[ LANGUAGES ]
+
+    English: IELTS 6.5

@@ -1,27 +1,35 @@
-HOÀNG HỒNG ANH
-==============
-Vị trí ứng tuyển: Lập trình viên Backend (Java)
-Liên hệ: hoang.hong.anh@example.com | 0913 000 123 | Hà Nội
+Phạm Ngọc Hạnh
+Lập trình viên Backend (Java)
 
-MỤC TIÊU NGHỀ NGHIỆP
+Email: pham.ngoc.hanh@example.com
+Điện thoại: 0978 000 930
+Địa điểm: Đà Nẵng
+
+Giới thiệu bản thân
+-------------------
 2 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
 
-KINH NGHIỆM LÀM VIỆC
-Lập trình viên Java | Công ty TNHH Dữ liệu Bắc Hà
-04/2024 - Hiện tại
-  - Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
-  - Viết unit test và integration test với JUnit, đạt độ phủ 86%
-  - Tối ưu truy vấn và index MySQL, giảm 42% thời gian phản hồi trung bình
-  - Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 57k request/ngày
+Kinh nghiệm
+-----------
+05/2024 - Hiện tại
+Lập trình viên Java, Công ty CP Giải pháp Sao Việt
+ * Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+ * Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+ * Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 12k request/ngày
+ * Viết unit test và integration test với JUnit, đạt độ phủ 76%
 
-DỰ ÁN
-  - Dự án cá nhân: Ứng dụng ghi chú đơn giản (Java)
+Dự án nổi bật
+-------------
+ * Tham gia hackathon nội bộ công ty
 
-HỌC VẤN
-  Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2020 - 2024)
+Học vấn
+-------
+Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2020 - 2024)
 
-KỸ NĂNG
-  AWS, MySQL, Git, Java
+Công nghệ
+---------
+Docker | Kafka | Spring Boot | Java | REST API
 
-NGOẠI NGỮ
-  Tiếng Anh: TOEIC 800
+Ngoại ngữ
+---------
+Tiếng Anh: Giao tiếp tốt

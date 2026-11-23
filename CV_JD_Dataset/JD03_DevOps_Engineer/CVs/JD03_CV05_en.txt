@@ -1,25 +1,26 @@
-LE BAO NGAN
-===========
-Applying for: DevOps Engineer
-Contact: le.bao.ngan@example.com | 0970 000 986 | Da Nang
+# Bui Bao Linh
+**Applying for:** DevOps Engineer  
+bui.bao.linh@example.com · 0966 000 377 · Hai Phong
 
-CAREER OBJECTIVE
-Recent graduate, seeking to contribute as a DevOps Engineer.
+## Career objective
+1 years of experience, seeking to contribute as a DevOps Engineer.
 
-WORK EXPERIENCE
-Intern - IT Helpdesk Technician | Ngân hàng TMCP Đại Phát (Khối CNTT)
-06/2025 - 12/2025
-  - Managed user accounts in Active Directory
-  - Installed and configured Windows PCs and office software
+## Employment history
+### System Engineer — Công ty CP Giải pháp Đám mây Việt
+*05/2025 - Present*
+- Built and maintained CI/CD pipelines with Jenkins/GitLab CI, cutting release time by 48%
+- Operated Kubernetes clusters running 90+ microservices with Docker
+- Set up monitoring and alerting, reducing incident response time by 35%
+- Provisioned AWS infrastructure using Terraform across 29+ environments
 
-PROJECTS
-  - Capstone: Building a LAN for a small business
+## Projects
+- Personal project: Home Linux server for experiments
 
-EDUCATION
-  B.Eng. in Information Technology, VNU University of Engineering and Technology (2022 - 2026)
+## Education
+- B.Eng. in Information Technology, Academy of Finance (2021 - 2025)
 
-SKILLS
-  WordPress, AWS, Visual Basic
+## Tech stack
+- Linux · Terraform · Docker · ArgoCD
 
-LANGUAGES
-  English: Reading comprehension
+## Languages
+- English: TOEIC 800

@@ -1,0 +1,30 @@
+TRẦN THÀNH QUÂN - Kỹ sư Kiểm thử Tự động (QA Automation)
+tran.thanh.quan@example.com | 0990 000 600 | Hà Nội
+
+== MỤC TIÊU NGHỀ NGHIỆP ==
+3 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư Kiểm thử Tự động (QA Automation).
+
+== QUÁ TRÌNH CÔNG TÁC ==
+02/2024 - Hiện tại      Kỹ sư kiểm thử tự động - TestPro Vietnam
+                        - Phối hợp với developer và product owner theo Agile/Scrum
+                        - Xây dựng bộ test tự động UI bằng Selenium và Java với hơn 53 test case
+                        - Kiểm thử REST API bằng Postman và xác thực dữ liệu bằng SQL
+                        - Ghi nhận và theo dõi lỗi trên Jira, phát hiện 71% lỗi trước khi phát hành
+
+10/2023 - 02/2024       Kỹ sư kiểm thử - Công ty CP Công nghệ Rồng Xanh
+                        - Phối hợp với developer và product owner theo Agile/Scrum
+                        - Ghi nhận và theo dõi lỗi trên Jira, phát hiện 71% lỗi trước khi phát hành
+
+== DỰ ÁN CÁ NHÂN ==
+- Dự án cá nhân: Framework kiểm thử tự động mẫu (Selenium, Java) cho website thương mại điện tử demo
+- Viết blog chia sẻ kinh nghiệm kiểm thử tự động
+
+== HỌC VẤN ==
+Kỹ sư Công nghệ thông tin, Đại học Ngoại thương (2019 - 2023)
+
+== KỸ NĂNG CHUYÊN MÔN ==
+Postman, SQL, Jira, Selenium
+Java, JMeter, CI/CD, Git
+
+== NGÔN NGỮ ==
+Tiếng Anh: Giao tiếp tốt

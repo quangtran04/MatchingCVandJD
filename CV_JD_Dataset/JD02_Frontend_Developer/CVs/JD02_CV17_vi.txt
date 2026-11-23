@@ -1,0 +1,31 @@
++-----------------------------------+
+| NGÔ QUỐC DŨNG                     |
+| Lập trình viên Frontend (React)   |
++-----------------------------------+
+  ngo.quoc.dung@example.com  /  0933 000 603  /  Hà Nội
+
+[ TÓM TẮT ]
+
+    Sinh viên mới tốt nghiệp, mong muốn đóng góp ở vị trí Lập trình viên Frontend (React).
+
+[ HỌC VẤN ]
+
+    Kỹ sư Công nghệ thông tin, Đại học Kinh tế Quốc dân (2022 - 2026)
+
+[ KINH NGHIỆM LÀM VIỆC ]
+
+> Thực tập sinh - Lập trình viên Web (WordPress) @ Startup EdTech Mầm Xanh (06/2025 - 12/2025)
+    • Xây dựng landing page tĩnh bằng HTML, CSS và jQuery
+    • Tùy chỉnh theme và plugin WordPress
+
+[ DỰ ÁN CÁ NHÂN ]
+
+    • Đồ án: Website bán hàng (HTML, CSS, JavaScript)
+
+[ KỸ NĂNG CHUYÊN MÔN ]
+
+    Java Swing  ·  Perl
+
+[ NGÔN NGỮ ]
+
+    Tiếng Anh: Đọc hiểu tài liệu

@@ -1,0 +1,22 @@
+TRAN HONG TRANG - QA Automation Engineer
+tran.hong.trang@example.com | 0967 000 487 | Hanoi
+
+== PROFESSIONAL SUMMARY ==
+Recent graduate, seeking to contribute as a QA Automation Engineer.
+
+== EDUCATION ==
+B.Eng. in Information Technology, Academy of Finance (2022 - 2026)
+
+== WORK EXPERIENCE ==
+06/2025 - 12/2025       Intern - Software Technical Support Agent - Ngân hàng số Kim Long (Khối CNTT)
+                        - Reproduced user-reported issues and escalated to developers
+                        - Answered customer tickets about software usage
+
+== SELECTED PROJECTS ==
+- Capstone: Testing a ticket-booking website (manual test cases)
+
+== TECHNICAL SKILLS ==
+jQuery, Visual Basic
+
+== LANGUAGE SKILLS ==
+English: Reading comprehension

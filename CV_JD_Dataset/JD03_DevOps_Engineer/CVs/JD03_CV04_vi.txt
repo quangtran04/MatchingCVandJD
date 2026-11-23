@@ -1,0 +1,33 @@
++----------------+
+| LÊ THỊ NGÂN    |
+| Kỹ sư DevOps   |
++----------------+
+  le.thi.ngan@example.com  /  0969 000 440  /  Đà Nẵng
+
+[ MỤC TIÊU NGHỀ NGHIỆP ]
+
+    1 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư DevOps.
+
+[ CÔNG NGHỆ ]
+
+    Terraform  ·  AWS  ·  CI/CD  ·  ArgoCD  ·  Linux
+
+[ KINH NGHIỆM ]
+
+> Kỹ sư Hệ thống @ Ngân hàng TMCP Đại Phát (Khối CNTT) (01/2025 - Hiện tại)
+    • Quản trị máy chủ Linux và tự động hóa tác vụ bằng shell script
+    • Xây dựng và duy trì pipeline CI/CD với Jenkins/GitLab CI, giảm 88% thời gian phát hành
+    • Thiết lập giám sát, cảnh báo, giảm 26% thời gian xử lý sự cố
+    • Triển khai hạ tầng AWS bằng Terraform cho hơn 19 môi trường
+
+[ DỰ ÁN CÁ NHÂN ]
+
+    • Dự án cá nhân: Dựng máy chủ Linux tại nhà để thử nghiệm
+
+[ TRÌNH ĐỘ HỌC VẤN ]
+
+    Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2021 - 2025)
+
+[ NGOẠI NGỮ ]
+
+    Tiếng Anh: TOEIC 800

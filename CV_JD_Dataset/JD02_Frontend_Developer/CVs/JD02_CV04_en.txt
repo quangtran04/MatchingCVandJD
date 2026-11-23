@@ -1,0 +1,34 @@
+DO HONG LAN
+===========
+Applying for: Frontend Developer (React)
+Contact: do.hong.lan@example.com | 0938 000 698 | Hai Phong
+
+ABOUT ME
+6 years of experience, seeking to contribute as a Frontend Developer (React).
+
+EXPERIENCE
+Frontend Developer | Pixelwave Vietnam
+02/2024 - Present
+  - Built responsive single-page applications with React and TypeScript used by 68k+ monthly users
+  - Improved page load time by 34% through code splitting and lazy loading
+  - Wrote unit tests with Jest and React Testing Library, reaching 81% coverage
+  - Worked closely with UI/UX designers and backend developers in Agile sprints
+
+Junior Frontend Developer | Công ty CP Thương mại Điện tử Muôn Nơi
+09/2022 - 11/2024
+  - Built responsive single-page applications with React and TypeScript used by 40k+ monthly users
+  - Wrote unit tests with Jest and React Testing Library, reaching 79% coverage
+
+Junior Frontend Developer | Startup EdTech Mầm Xanh
+02/2020 - 02/2022
+  - Integrated REST APIs and managed state with Redux/Context
+  - Improved page load time by 35% through code splitting and lazy loading
+
+ACADEMIC BACKGROUND
+  B.Eng. in Information Technology, National Economics University (2016 - 2020)
+
+TECH STACK
+  Webpack, TypeScript, JavaScript, Git, Next.js, REST API, Tailwind CSS, React, HTML/CSS
+
+LANGUAGES
+  English: IELTS 6.5

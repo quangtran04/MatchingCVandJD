@@ -1,0 +1,21 @@
+VŨ GIA HÙNG - Lập trình viên Frontend (React)
+vu.gia.hung@example.com | 0990 000 765 | Hà Nội
+
+== GIỚI THIỆU BẢN THÂN ==
+1 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Frontend (React).
+
+== HỌC VẤN ==
+Kỹ sư Công nghệ thông tin, Đại học Công nghệ - ĐHQGHN (2021 - 2025)
+
+== QUÁ TRÌNH CÔNG TÁC ==
+06/2025 - Hiện tại      Lập trình viên Frontend - Công ty CP Thương mại Điện tử Muôn Nơi
+                        - Cải thiện 36% thời gian tải trang nhờ code splitting và lazy loading
+                        - Viết unit test với Jest và React Testing Library, đạt độ phủ 85%
+                        - Tích hợp REST API và quản lý state bằng Redux/Context
+                        - Xây dựng ứng dụng single-page responsive bằng React và TypeScript phục vụ hơn 41k người dùng/tháng
+
+== KỸ NĂNG ==
+TypeScript, JavaScript, Webpack, HTML/CSS
+
+== NGOẠI NGỮ ==
+Tiếng Anh: Giao tiếp tốt

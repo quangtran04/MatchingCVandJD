@@ -1,25 +1,35 @@
-HOANG QUOC KHOA
-===============
-Applying for: QA Automation Engineer
-Contact: hoang.quoc.khoa@example.com | 0998 000 773 | Da Nang
+Hoang Van Hung
+QA Automation Engineer
 
-CAREER OBJECTIVE
-Recent graduate, seeking to contribute as a QA Automation Engineer.
+Email: hoang.van.hung@example.com
+Phone: 0977 000 781
+Location: Hai Phong
 
-WORK EXPERIENCE
-Intern - Software Technical Support Agent | TestPro Vietnam
-06/2025 - 12/2025
-  - Answered customer tickets about software usage
-  - Wrote user guides and FAQs
+Career objective
+----------------
+1 years of experience, seeking to contribute as a QA Automation Engineer.
 
-PROJECTS
-  - Capstone: Testing a ticket-booking website (manual test cases)
+Academic background
+-------------------
+B.Eng. in Information Technology, Duy Tan University (2021 - 2025)
 
-EDUCATION
-  B.Eng. in Information Technology, Vietnam Maritime University (2022 - 2026)
+Experience
+----------
+04/2025 - Present
+Junior QA Engineer, Công ty TNHH Logistics Nhanh (IT)
+ * Developed automated UI test suites with Selenium and Java covering 22+ test cases
+ * Integrated automated tests into CI pipeline, reducing regression time by 32%
+ * Tested REST APIs with Postman and validated data with SQL queries
+ * Logged and tracked defects in Jira, achieving 72% defect detection before release
 
-SKILLS
-  Java, Postman, WordPress, PHP
+Selected projects
+-----------------
+ * Personal project: Manual test cases for an open-source app
 
-LANGUAGES
-  English: Reading comprehension
+Skills
+------
+Jira | Java | SQL | Playwright
+
+Languages
+---------
+English: IELTS 6.5

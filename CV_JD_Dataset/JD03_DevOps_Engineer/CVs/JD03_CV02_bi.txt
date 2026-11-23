@@ -1,0 +1,35 @@
+VŨ MINH HUY - Kỹ sư DevOps / DevOps Engineer
+vu.minh.huy@example.com | 0946 000 632 | TP. Hồ Chí Minh / Ho Chi Minh City
+
+== TÓM TẮT / PROFESSIONAL SUMMARY ==
+6 năm kinh nghiệm / 6 yrs exp. Ứng tuyển Kỹ sư DevOps / DevOps Engineer.
+
+== TRÌNH ĐỘ HỌC VẤN / ACADEMIC BACKGROUND ==
+Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Ngoại thương / Foreign Trade University (2016 - 2020)
+
+== KINH NGHIỆM / EMPLOYMENT HISTORY ==
+05/2024 - Hiện tại / PresentSenior DevOps Engineer / Senior DevOps Engineer - Công ty TNHH Hạ tầng Số Bắc Hà
+                        - Quản trị máy chủ Linux và tự động hóa tác vụ bằng shell script
+                        - Built and maintained CI/CD pipelines with Jenkins/GitLab CI, cutting release time by 60%
+                        - Thiết lập giám sát, cảnh báo, giảm 31% thời gian xử lý sự cố
+                        - Operated Kubernetes clusters running 71+ microservices with Docker
+
+06/2022 - 06/2024       Kỹ sư DevOps / DevOps Engineer - Công ty TNHH Dữ liệu Sao Mai
+                        - Xây dựng và duy trì pipeline CI/CD với Jenkins/GitLab CI, giảm 83% thời gian phát hành
+                        - Operated Kubernetes clusters running 81+ microservices with Docker
+
+01/2020 - 10/2022       Kỹ sư Hệ thống / System Engineer - Công ty CP Giải pháp Đám mây Việt
+                        - Quản trị máy chủ Linux và tự động hóa tác vụ bằng shell script
+                        - Built and maintained CI/CD pipelines with Jenkins/GitLab CI, cutting release time by 53%
+
+== DỰ ÁN / PROJECTS ==
+- Mã nguồn mở: chia sẻ script tự động hóa trên Linux qua GitHub / Open source: shared Linux automation scripts on GitHub
+- Dự án cá nhân: Homelab Kubernetes (k3s) dựng bằng Terraform, có pipeline CI/CD / Personal project: Kubernetes (k3s) homelab provisioned with Terraform and a CI/CD pipeline
+
+== KỸ NĂNG CHUYÊN MÔN / TECHNICAL SKILLS ==
+Terraform, Ansible, AWS, CI/CD
+Docker, Linux, Kubernetes, Prometheus
+Grafana
+
+== NGOẠI NGỮ / LANGUAGES ==
+Tiếng Anh / English: IELTS 7.0

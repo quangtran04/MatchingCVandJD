@@ -51,6 +51,10 @@ def _extract_txt(payload: bytes) -> str:
 def _extract_docx(payload: bytes) -> str:
     try:
         from docx import Document
+        from docx.oxml.table import CT_Tbl
+        from docx.oxml.text.paragraph import CT_P
+        from docx.table import Table
+        from docx.text.paragraph import Paragraph
     except ImportError as error:
         raise TextExtractionError(
             "PARSER_NOT_INSTALLED", "Thiếu thư viện python-docx trên máy chủ.", 503
@@ -58,12 +62,25 @@ def _extract_docx(payload: bytes) -> str:
 
     try:
         document = Document(BytesIO(payload))
-        parts = [
-            paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()
-        ]
-        for table in document.tables:
-            for row in table.rows:
-                parts.extend(cell.text.strip() for cell in row.cells if cell.text.strip())
+        parts: list[str] = []
+        # Traverse paragraphs and tables in exact document order so header tables
+        # and tabular experience/skill blocks stay in their original positions.
+        for child in document.element.body.iterchildren():
+            if isinstance(child, CT_P):
+                text_line = Paragraph(child, document).text.strip()
+                if text_line:
+                    parts.append(text_line)
+            elif isinstance(child, CT_Tbl):
+                table = Table(child, document)
+                for row in table.rows:
+                    seen_tc = set()
+                    for cell in row.cells:
+                        if cell._tc in seen_tc:
+                            continue
+                        seen_tc.add(cell._tc)
+                        cell_text = cell.text.strip()
+                        if cell_text:
+                            parts.append(cell_text)
     except Exception as error:
         raise TextExtractionError("INVALID_DOCX", "Không thể đọc tệp Word (.docx).") from error
 

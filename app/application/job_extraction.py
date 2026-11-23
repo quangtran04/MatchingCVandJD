@@ -180,6 +180,7 @@ def extract_job_profile(text: str) -> dict[str, object]:
     edu_lines = _matching_lines(requirement_lines, EDUCATION_PATTERN)
     if not edu_lines and overview_lines:
         edu_lines = _matching_lines(overview_lines, EDUCATION_PATTERN)
+    edu_lines = _dedupe_education_lines(edu_lines)
 
     lang_lines = _matching_lines(requirement_lines, LANGUAGE_PATTERN)
     if not lang_lines and overview_lines:
@@ -217,6 +218,35 @@ def extract_job_profile(text: str) -> dict[str, object]:
         },
         "preferred_requirements": _clean_bullets(preferred_lines),
     }
+
+
+def _education_signature(line: str) -> str:
+    lowered = line.lower()
+    if re.search(r"\bgpa\b|học\s+lực|xếp\s+loại|điểm\s+trung\s+bình", lowered):
+        return "gpa"
+    if re.search(r"tiến\s+sĩ|\bphd\b|doctorate", lowered):
+        return "phd"
+    if re.search(r"thạc\s+sĩ|\bmaster\b|\bm\.?sc\b|\bmba\b", lowered):
+        return "master"
+    if re.search(r"sinh\s+viên|student|undergraduate", lowered):
+        return "student"
+    if re.search(r"đại\s+học|cử\s+nhân|kỹ\s+sư|bachelor|\bdegree\b|b\.?eng|b\.?sc", lowered):
+        return "bachelor"
+    if re.search(r"cao\s+đẳng|college", lowered):
+        return "college"
+    return _normalize_key(line)
+
+
+def _dedupe_education_lines(lines: list[str]) -> list[str]:
+    seen_sigs: set[str] = set()
+    result: list[str] = []
+    for line in lines:
+        sig = _education_signature(line)
+        if sig in seen_sigs:
+            continue
+        seen_sigs.add(sig)
+        result.append(line)
+    return result
 
 
 def _is_non_overview_line(line: str, title_value: str) -> bool:
@@ -508,8 +538,9 @@ def _mandatory_skills(lines: list[str]) -> list[str]:
 def _extract_fields(lines: list[str]) -> list[str]:
     fields = []
     ignored_field = re.compile(
-        r"^(?:các\s+)?(?:ngành|chuyên\s+ngành)\s+(?:khác\s+)?(?:có\s+)?liên\s+quan.*|"
-        r"^related\s+(?:fields?|majors?).*|^tương\s+đương.*",
+        r"^(?:các\s+)?(?:ngành|chuyên\s+ngành)\s+(?:khác\s+)?(?:(?:có\s+)?liên\s+quan|phù\s+hợp|tương\s+đương).*|"
+        r"^(?:phù\s+hợp|liên\s+quan|có\s+liên\s+quan|tương\s+ứng|tương\s+đương|khác)\b.*|"
+        r"^(?:a\s+)?(?:related|relevant|appropriate|applicable|equivalent|similar)\s*(?:fields?|majors?|disciplines?)?.*$",
         re.IGNORECASE,
     )
     for line in lines:

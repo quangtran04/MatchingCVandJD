@@ -1,0 +1,41 @@
+Pham Duc Cuong
+Frontend Developer (React)
+
+Email: pham.duc.cuong@example.com
+Phone: 0986 000 312
+Location: Hai Phong
+
+About me
+--------
+7 years of experience, seeking to contribute as a Frontend Developer (React).
+
+Employment history
+------------------
+05/2023 - Present
+Frontend Developer, Công ty TNHH Giải pháp Web Lạc Việt
+ * Improved page load time by 27% through code splitting and lazy loading
+ * Wrote unit tests with Jest and React Testing Library, reaching 90% coverage
+ * Integrated REST APIs and managed state with Redux/Context
+ * Built responsive single-page applications with React and TypeScript used by 66k+ monthly users
+
+11/2021 - 01/2023
+Junior Frontend Developer, Startup EdTech Mầm Xanh
+ * Worked closely with UI/UX designers and backend developers in Agile sprints
+ * Integrated REST APIs and managed state with Redux/Context
+
+06/2019 - 09/2021
+Junior Frontend Developer, Công ty TNHH Phần mềm Ánh Dương
+ * Integrated REST APIs and managed state with Redux/Context
+ * Wrote unit tests with Jest and React Testing Library, reaching 90% coverage
+
+Academic background
+-------------------
+B.Eng. in Information Technology, Duy Tan University (2015 - 2019)
+
+Technical skills
+----------------
+JavaScript | Tailwind CSS | React | Jest | TypeScript | HTML/CSS | Webpack | Git | REST API
+
+Language skills
+---------------
+English: TOEIC 800

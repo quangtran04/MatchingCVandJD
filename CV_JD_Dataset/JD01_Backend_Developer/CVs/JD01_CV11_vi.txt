@@ -1,0 +1,29 @@
++---------------------------------+
+| ĐẶNG KHÁNH DUNG                 |
+| Lập trình viên Backend (Java)   |
++---------------------------------+
+  dang.khanh.dung@example.com  /  0948 000 818  /  Hà Nội
+
+[ MỤC TIÊU NGHỀ NGHIỆP ]
+
+    2 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Backend (Java).
+
+[ KINH NGHIỆM ]
+
+> Lập trình viên Java @ Công ty TNHH Phần mềm Hoa Sen (11/2024 - Hiện tại)
+    • Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 36k request/ngày
+    • Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+    • Tối ưu truy vấn và index MySQL, giảm 40% thời gian phản hồi trung bình
+    • Phối hợp với nhóm Frontend và QA theo quy trình Agile/Scrum
+
+[ HỌC VẤN ]
+
+    Kỹ sư Công nghệ thông tin, Đại học Kinh tế TP.HCM (2020 - 2024)
+
+[ KỸ NĂNG ]
+
+    Git  ·  AWS  ·  MySQL  ·  REST API
+
+[ NGOẠI NGỮ ]
+
+    Tiếng Anh: Giao tiếp tốt

@@ -1,0 +1,32 @@
+# Hoàng Bảo Trang
+**Vị trí ứng tuyển:** Lập trình viên Frontend (React)  
+hoang.bao.trang@example.com · 0985 000 967 · Hà Nội
+
+## Tóm tắt
+4 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Frontend (React).
+
+## Trình độ học vấn
+- Kỹ sư Công nghệ thông tin, Đại học Bách khoa Hà Nội (2018 - 2022)
+
+## Kinh nghiệm
+### Lập trình viên Frontend — Pixelwave Vietnam
+*02/2024 - Hiện tại*
+- Viết unit test với Jest và React Testing Library, đạt độ phủ 71%
+- Tích hợp REST API và quản lý state bằng Redux/Context
+- Cải thiện 45% thời gian tải trang nhờ code splitting và lazy loading
+- Phối hợp chặt chẽ với UI/UX designer và backend developer theo Agile
+
+### Lập trình viên Frontend — Công ty CP Công nghệ Bắc Hà
+*05/2022 - 07/2024*
+- Xây dựng ứng dụng single-page responsive bằng React và TypeScript phục vụ hơn 35k người dùng/tháng
+- Cải thiện 44% thời gian tải trang nhờ code splitting và lazy loading
+
+## Dự án nổi bật
+- Dự án cá nhân: Ứng dụng quản lý công việc kiểu Kanban (React, TypeScript), có demo trực tuyến
+- Dự án cá nhân: Trang thời tiết gọi REST API công khai (React, JavaScript)
+
+## Công nghệ
+- Redux · Next.js · Git · TypeScript · JavaScript · Tailwind CSS · HTML/CSS · REST API · React
+
+## Ngôn ngữ
+- Tiếng Anh: TOEIC 800

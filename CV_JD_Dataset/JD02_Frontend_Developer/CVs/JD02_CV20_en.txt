@@ -1,37 +1,24 @@
-LE KHANH YEN
-============
-Applying for: Frontend Developer (React)
-Contact: le.khanh.yen@example.com | 0914 000 874 | Hanoi
+# Le Van Dung
+**Applying for:** Frontend Developer (React)  
+le.van.dung@example.com · 0960 000 566 · Hai Phong
 
-CAREER OBJECTIVE
-6 years of experience, seeking to contribute as a Frontend Developer (React).
+## Career objective
+Recent graduate, seeking to contribute as a Frontend Developer (React).
 
-WORK EXPERIENCE
-Frontend Developer | Pixelwave Vietnam
-11/2024 - Present
-  - Integrated REST APIs and managed state with Redux/Context
-  - Improved page load time by 37% through code splitting and lazy loading
-  - Built responsive single-page applications with React and TypeScript used by 83k+ monthly users
-  - Wrote unit tests with Jest and React Testing Library, reaching 85% coverage
+## Academic background
+- B.Eng. in Information Technology, University of Economics HCMC (2022 - 2026)
 
-Junior Frontend Developer | Công ty CP Công nghệ Bắc Hà
-08/2022 - 12/2024
-  - Wrote unit tests with Jest and React Testing Library, reaching 80% coverage
-  - Built responsive single-page applications with React and TypeScript used by 90k+ monthly users
+## Experience
+### Intern - WordPress Web Developer — Startup EdTech Mầm Xanh
+*06/2025 - 12/2025*
+- Built static landing pages with HTML, CSS and jQuery
+- Fixed cross-browser display issues
 
-Junior Frontend Developer | Startup EdTech Mầm Xanh
-04/2020 - 09/2022
-  - Integrated REST APIs and managed state with Redux/Context
-  - Worked closely with UI/UX designers and backend developers in Agile sprints
+## Personal projects
+- Capstone: E-commerce website (HTML, CSS, JavaScript)
 
-PROJECTS
-  - Open source: contributed UI components to a React library
+## Technical skills
+- PHP · Visual Basic
 
-EDUCATION
-  B.Eng. in Information Technology, Hanoi University of Science and Technology (2016 - 2020)
-
-SKILLS
-  HTML/CSS, REST API, Git, Redux, TypeScript, React, Webpack, JavaScript
-
-LANGUAGES
-  English: TOEIC 800
+## Language skills
+- English: Basic

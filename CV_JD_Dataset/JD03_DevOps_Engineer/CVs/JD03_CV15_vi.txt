@@ -1,0 +1,35 @@
+Bùi Hồng Mai
+Kỹ sư DevOps
+
+Email: bui.hong.mai@example.com
+Điện thoại: 0945 000 586
+Địa điểm: Hải Phòng
+
+Giới thiệu bản thân
+-------------------
+5 năm kinh nghiệm, mong muốn đóng góp ở vị trí Kỹ sư DevOps.
+
+Học vấn
+-------
+Kỹ sư Công nghệ thông tin, Đại học Bách khoa TP.HCM (2017 - 2021)
+
+Quá trình công tác
+------------------
+03/2023 - Hiện tại
+Kỹ thuật viên IT Helpdesk, Công ty CP Công nghệ Rồng Xanh
+ * Quản lý tài khoản người dùng trên Active Directory
+ * Cài đặt, cấu hình máy tính Windows và phần mềm văn phòng
+ * Xử lý sự cố phần cứng và mạng cho người dùng
+
+05/2021 - 06/2023
+Kỹ thuật viên IT Helpdesk, Công ty TNHH Dữ liệu Sao Mai
+ * Cài đặt, cấu hình máy tính Windows và phần mềm văn phòng
+ * Xử lý sự cố phần cứng và mạng cho người dùng
+
+Kỹ năng chuyên môn
+------------------
+PHP | jQuery
+
+Ngôn ngữ
+--------
+Tiếng Anh: Cơ bản

@@ -1,0 +1,32 @@
+# Nguyễn Ngọc Thảo
+**Vị trí ứng tuyển / Applying for:** Kỹ sư DevOps / DevOps Engineer  
+nguyen.ngoc.thao@example.com · 0918 000 541 · Hải Phòng / Hai Phong
+
+## Mục tiêu nghề nghiệp / Career objective
+4 năm kinh nghiệm / 4 yrs exp. Ứng tuyển Kỹ sư DevOps / DevOps Engineer.
+
+## Công nghệ / Tech stack
+- Docker · Ansible · Linux · CI/CD · Kubernetes · Terraform · AWS · Grafana
+
+## Kinh nghiệm làm việc / Work experience
+### Kỹ sư DevOps / DevOps Engineer — CloudBridge Vietnam
+*10/2024 - Hiện tại / Present*
+- Vận hành cụm Kubernetes chạy hơn 71 microservice với Docker
+- Set up monitoring and alerting, reducing incident response time by 33%
+- Quản trị máy chủ Linux và tự động hóa tác vụ bằng shell script
+- Provisioned AWS infrastructure using Terraform across 31+ environments
+
+### Kỹ sư Hệ thống / System Engineer — Ngân hàng TMCP Đại Phát (Khối CNTT)
+*08/2022 - 06/2024*
+- Quản trị máy chủ Linux và tự động hóa tác vụ bằng shell script
+- Set up monitoring and alerting, reducing incident response time by 14%
+
+## Dự án nổi bật / Selected projects
+- Dự án cá nhân: Homelab Kubernetes (k3s) dựng bằng Terraform, có pipeline CI/CD / Personal project: Kubernetes (k3s) homelab provisioned with Terraform and a CI/CD pipeline
+- Mã nguồn mở: chia sẻ script tự động hóa trên Linux qua GitHub / Open source: shared Linux automation scripts on GitHub
+
+## Học vấn / Education
+- Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Kinh tế TP.HCM / University of Economics HCMC (2018 - 2022)
+
+## Ngôn ngữ / Language skills
+- Tiếng Anh / English: Giao tiếp tốt / Good communication

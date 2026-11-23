@@ -73,7 +73,24 @@ _KNOWN_TECH_TERMS = {
 }
 
 
+_EN_CLAUSE_WORD_RE = re.compile(
+    r"\b(?:the|and|with|for|from|using|across|through|into|that|this|are|were|was|have|has|"
+    r"built|developed|designed|managed|operated|provisioned|maintained|wrote|created|implemented|"
+    r"collaborated|integrated|optimized|improved|reduced|cutting|reaching|serving|tested|logged|"
+    r"tracked|worked|administered|automated|executed|reported|performed|prepared|analyzed|"
+    r"experience|proficient|relevant|degree|years|monthly|daily|average|response|release|"
+    r"pipelines?|environments?|applications?|interfaces?|services?|queries|systems?)\b",
+    re.IGNORECASE,
+)
+
+
+def _contains_english_clauses(text: str) -> bool:
+    return len(_EN_CLAUSE_WORD_RE.findall(text)) >= 2
+
+
 def _is_already_vietnamese(text: str) -> bool:
+    if _contains_english_clauses(text):
+        return False
     accents = _VN_ACCENT_RE.findall(text)
     if len(accents) >= 2:
         return True
@@ -112,13 +129,15 @@ def _cache_set(target_lang: str, text: str, translated: str) -> None:
             _CACHE.popitem(last=False)
 
 
-def _google_translate_raw(text: str, target_lang: str, timeout: float = 8.0) -> str | None:
+def _google_translate_raw(
+    text: str, target_lang: str, source_lang: str = "auto", timeout: float = 8.0
+) -> str | None:
     try:
         resp = requests.get(
             GOOGLE_TRANSLATE_URL,
             params={
                 "client": "gtx",
-                "sl": "auto",
+                "sl": source_lang,
                 "tl": target_lang,
                 "dt": "t",
                 "q": text,
@@ -137,33 +156,82 @@ def _google_translate_raw(text: str, target_lang: str, timeout: float = 8.0) -> 
         return None
 
 
+_DEGREE_PRE_REPLACEMENTS_VI: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bB\.?\s*Eng\.?(?=\s+in\b|\s*,|\s|$)", re.IGNORECASE), "Bachelor of Engineering"),
+    (re.compile(r"\bB\.?\s*Sc\.?(?=\s+in\b|\s*,|\s|$)", re.IGNORECASE), "Bachelor of Science"),
+    (re.compile(r"\bB\.?\s*S\.?(?=\s+in\b)", re.IGNORECASE), "Bachelor of Science"),
+    (re.compile(r"\bB\.?\s*A\.?(?=\s+in\b)", re.IGNORECASE), "Bachelor of Arts"),
+    (re.compile(r"\bM\.?\s*Eng\.?(?=\s+in\b|\s*,|\s|$)", re.IGNORECASE), "Master of Engineering"),
+    (re.compile(r"\bM\.?\s*Sc\.?(?=\s+in\b|\s*,|\s|$)", re.IGNORECASE), "Master of Science"),
+    (re.compile(r"\bPh\.?\s*D\.?(?=\s+in\b|\s*,|\s|$)", re.IGNORECASE), "Doctor of Philosophy"),
+)
+
+_REDUNDANT_DEGREE_PREFIX_VI = re.compile(
+    r"\b(?:B\.?\s*Eng\.?|B\.?\s*Sc\.?|B\.?\s*S\.?|B\.?\s*A\.?|M\.?\s*Eng\.?|M\.?\s*Sc\.?|Ph\.?\s*D\.?)"
+    r"\s+(?=(?:Kỹ\s+sư|Cử\s+nhân|Thạc\s+sĩ|Tiến\s+sĩ)\b)",
+    re.IGNORECASE,
+)
+
+
+def _prepare_for_translation(text: str, target_lang: str) -> str:
+    if target_lang != "vi":
+        return text
+    prepared = text
+    for pattern, replacement in _DEGREE_PRE_REPLACEMENTS_VI:
+        prepared = pattern.sub(replacement, prepared)
+    return prepared
+
+
+def _postprocess_translation(text: str, target_lang: str) -> str:
+    if target_lang != "vi":
+        return text
+    return _REDUNDANT_DEGREE_PREFIX_VI.sub("", text).strip()
+
+
+def _source_lang_for(text: str, target_lang: str) -> str:
+    # Force explicit source language for mixed VI+EN strings so Google Translate
+    # does not auto-detect sl == tl and return the mixed string untranslated.
+    if target_lang == "vi":
+        return "en"
+    if target_lang == "en" and _VN_ACCENT_RE.search(text):
+        return "vi"
+    return "auto"
+
+
 def _translate_chunk(chunk: list[str], target_lang: str) -> dict[str, str]:
     if not chunk:
         return {}
     if len(chunk) == 1:
         item = chunk[0]
-        translated = _google_translate_raw(item, target_lang) or item
-        _cache_set(target_lang, item, translated)
-        return {item: translated}
+        prepared = _prepare_for_translation(item, target_lang)
+        sl = _source_lang_for(prepared, target_lang)
+        translated = _google_translate_raw(prepared, target_lang, source_lang=sl) or item
+        cleaned = _postprocess_translation(translated, target_lang) or item
+        _cache_set(target_lang, item, cleaned)
+        return {item: cleaned}
 
-    joined = SEGMENT_SEP.join(chunk)
-    translated_joined = _google_translate_raw(joined, target_lang)
+    prepared_chunk = [_prepare_for_translation(item, target_lang) for item in chunk]
+    joined = SEGMENT_SEP.join(prepared_chunk)
+    sl = _source_lang_for(joined, target_lang)
+    translated_joined = _google_translate_raw(joined, target_lang, source_lang=sl)
     if translated_joined:
         pieces = SEGMENT_SEP_RE.split(translated_joined)
         if len(pieces) == len(chunk):
             result: dict[str, str] = {}
             for orig, trans in zip(chunk, pieces, strict=True):
-                cleaned = trans.strip() or orig
+                cleaned = _postprocess_translation(trans.strip(), target_lang) or orig
                 _cache_set(target_lang, orig, cleaned)
                 result[orig] = cleaned
             return result
 
     # Fallback: translate items individually if separator count mismatched
     result = {}
-    for orig in chunk:
-        translated = _google_translate_raw(orig, target_lang) or orig
-        _cache_set(target_lang, orig, translated)
-        result[orig] = translated
+    for orig, prep in zip(chunk, prepared_chunk, strict=True):
+        item_sl = _source_lang_for(prep, target_lang)
+        translated = _google_translate_raw(prep, target_lang, source_lang=item_sl) or orig
+        cleaned = _postprocess_translation(translated, target_lang) or orig
+        _cache_set(target_lang, orig, cleaned)
+        result[orig] = cleaned
     return result
 
 

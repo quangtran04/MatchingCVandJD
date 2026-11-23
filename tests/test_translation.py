@@ -14,7 +14,9 @@ def test_should_skip_technical_and_contact_strings() -> None:
 def test_translate_texts_batches_and_caches(monkeypatch) -> None:
     calls: list[str] = []
 
-    def fake_google(text: str, target_lang: str, timeout: float = 8.0) -> str:
+    def fake_google(
+        text: str, target_lang: str, source_lang: str = "auto", timeout: float = 8.0
+    ) -> str:
         calls.append(text)
         return text.replace("Xây dựng API", "Build API").replace("Hà Nội", "Hanoi")
 
@@ -37,8 +39,10 @@ def test_translate_texts_batches_and_caches(monkeypatch) -> None:
 def test_translate_english_jd_to_vietnamese_skips_existing_vietnamese(monkeypatch) -> None:
     calls: list[str] = []
 
-    def fake_google(text: str, target_lang: str, timeout: float = 8.0) -> str:
-        calls.append(f"{target_lang}:{text}")
+    def fake_google(
+        text: str, target_lang: str, source_lang: str = "auto", timeout: float = 8.0
+    ) -> str:
+        calls.append(f"{source_lang}->{target_lang}:{text}")
         return text.replace(
             "Develop web interfaces with React", "Phát triển giao diện web với React"
         )
@@ -60,4 +64,29 @@ def test_translate_english_jd_to_vietnamese_skips_existing_vietnamese(monkeypatc
     assert out["Xây dựng hệ thống backend tại Hà Nội"] == "Xây dựng hệ thống backend tại Hà Nội"
     assert out["React"] == "React"
     assert len(calls) == 1
+
+
+def test_degree_abbreviation_normalization_and_cleanup() -> None:
+    prepared = translation._prepare_for_translation(
+        "B.Eng. in Information Technology, HCMC University of Technology", "vi"
+    )
+    assert prepared == "Bachelor of Engineering in Information Technology, HCMC University of Technology"
+    cleaned = translation._postprocess_translation(
+        "B.Eng. Kỹ sư Công nghệ thông tin, Đại học Bách khoa TP.HCM", "vi"
+    )
+    assert cleaned == "Kỹ sư Công nghệ thông tin, Đại học Bách khoa TP.HCM"
+
+
+def test_mixed_vietnamese_and_english_text_is_not_skipped_for_vi() -> None:
+    mixed = (
+        "Vận hành cụm Kubernetes chạy hơn 74 microservice với Docker "
+        "Provisioned AWS infrastructure using Terraform across 17+ environments "
+        "Thiết lập giám sát, cảnh báo, giảm 23% thời gian xử lý sự cố "
+        "Built and maintained CI/CD pipelines with Jenkins/GitLab CI, cutting release time by 15%"
+    )
+    pure_vi = "Vận hành cụm Kubernetes chạy hơn 74 microservice với Docker và Terraform"
+    assert not translation.should_skip_translation(mixed, "vi")
+    assert translation.should_skip_translation(pure_vi, "vi")
+
+
 

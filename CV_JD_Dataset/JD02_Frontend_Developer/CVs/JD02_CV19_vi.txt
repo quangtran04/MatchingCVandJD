@@ -1,0 +1,28 @@
+ĐỖ THU LINH
+===========
+Vị trí ứng tuyển: Lập trình viên Frontend (React)
+Liên hệ: do.thu.linh@example.com | 0995 000 145 | Hà Nội
+
+MỤC TIÊU NGHỀ NGHIỆP
+4 năm kinh nghiệm, mong muốn đóng góp ở vị trí Lập trình viên Frontend (React).
+
+CÔNG NGHỆ
+  PHP, Java Swing
+
+KINH NGHIỆM
+Lập trình viên Web (WordPress) | Công ty CP Thương mại Điện tử Muôn Nơi
+02/2024 - Hiện tại
+  - Xây dựng landing page tĩnh bằng HTML, CSS và jQuery
+  - Tùy chỉnh theme và plugin WordPress
+  - Sửa lỗi hiển thị trên nhiều trình duyệt
+
+Lập trình viên Web (WordPress) | Pixelwave Vietnam
+04/2022 - 12/2024
+  - Sửa lỗi hiển thị trên nhiều trình duyệt
+  - Tùy chỉnh theme và plugin WordPress
+
+TRÌNH ĐỘ HỌC VẤN
+  Kỹ sư Công nghệ thông tin, Đại học Bách khoa TP.HCM (2018 - 2022)
+
+NGOẠI NGỮ
+  Tiếng Anh: Đọc hiểu tài liệu

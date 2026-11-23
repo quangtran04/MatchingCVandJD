@@ -1,0 +1,28 @@
+# Ngô Thành Hùng
+**Vị trí ứng tuyển / Applying for:** Lập trình viên Backend (Java) / Backend Developer (Java)  
+ngo.thanh.hung@example.com · 0979 000 740 · Hải Phòng / Hai Phong
+
+## Giới thiệu bản thân / About me
+3 năm kinh nghiệm / 3 yrs exp. Ứng tuyển Lập trình viên Backend (Java) / Backend Developer (Java).
+
+## Kinh nghiệm làm việc / Work experience
+### Lập trình viên Backend / Backend Developer — Công ty TNHH Dữ liệu Bắc Hà
+*07/2024 - Hiện tại / Present*
+- Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+- Collaborated with frontend and QA teams in Agile/Scrum sprints
+- Thiết kế và phát triển RESTful API bằng Java, Spring Boot phục vụ hơn 13k request/ngày
+- Optimized MySQL queries and indexes, reducing average response time by 24%
+
+### Lập trình viên Java / Java Developer — Công ty CP Công nghệ Rồng Xanh
+*12/2023 - 02/2024*
+- Đóng gói dịch vụ bằng Docker và xây dựng pipeline CI/CD
+- Wrote unit and integration tests with JUnit, reaching 70% coverage
+
+## Học vấn / Education
+- Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Bách khoa TP.HCM / HCMC University of Technology (2019 - 2023)
+
+## Công nghệ / Tech stack
+- AWS · MySQL · Spring Boot · REST API
+
+## Ngoại ngữ / Languages
+- Tiếng Anh / English: IELTS 7.0

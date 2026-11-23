@@ -184,5 +184,27 @@ Computer Vision:
     assert "Computer Vision:" not in profile2["job_description"]["description"]
 
 
+def test_ignores_generic_field_of_study_placeholders() -> None:
+    jd = """
+Yêu cầu ứng viên
+- Tốt nghiệp Đại học chuyên ngành phù hợp
+- Bachelor's degree in a relevant field
+"""
+    assert extract_job_profile(jd)["requirements"]["fields_of_study"] == []
+
+
+def test_deduplicates_bilingual_education_requirements() -> None:
+    jd = """
+Yêu cầu ứng viên
+- Tốt nghiệp Đại học chuyên ngành phù hợp
+- Bachelor's degree in a relevant field
+"""
+    assert extract_job_profile(jd)["requirements"]["education"] == [
+        "Tốt nghiệp Đại học chuyên ngành phù hợp"
+    ]
+
+
+
+
 
 

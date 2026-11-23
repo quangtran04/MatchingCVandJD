@@ -1,0 +1,11 @@
+CÁC TIÊU CHÍ CHƯA HOÀN THÀNH
+
+1. Hai thành viên chấm mức phù hợp độc lập thủ công (thang 1-5) cho 80 CV (hiện human_ratings.csv được sinh tự động bằng công thức trong scripts/evaluate_dataset.py).
+2. Kiểm tra thủ công ~30 câu bằng chứng tính giải thích bởi người thật (hiện cột human_verdict_correct trong evidence_audit_32.csv được gán tự động bằng luật trong scripts/evaluate_dataset.py).
+3. Thí nghiệm chọn và kiểm tra độ nhạy cho các tham số chủ quan còn lại:
+   - Ngưỡng phân loại "phù hợp một phần" (strong / partial / unverified).
+   - Hệ số độ tin cậy của từng tầng (0,8 / 0,95 và ngưỡng TF-IDF cosine / RapidFuzz).
+   - Mức trần điểm thưởng dự án tối đa (+5 / +10 / +15).
+4. Tích hợp bộ tách từ ghép tiếng Việt tổng quát (hiện mới chỉ có danh sách cứng ~90 cụm từ IT trong app/application/nlp_text.py).
+5. Kiểm thử trích xuất trên CV thực tế đa dạng bố cục (80 CV hiện tại theo khuôn mẫu đồng nhất nên đạt 100% tuyệt đối).
+6. Sửa văn phong câu quá dài trong báo cáo baocao/baocao_hoan_chinh.docx (vẫn còn 29 câu dài trên 60 từ).

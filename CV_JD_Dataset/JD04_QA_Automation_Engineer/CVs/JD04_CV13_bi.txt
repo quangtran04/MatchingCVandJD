@@ -1,0 +1,28 @@
+# Hoàng Phương Linh
+**Vị trí ứng tuyển / Applying for:** Kỹ sư Kiểm thử Tự động (QA Automation) / QA Automation Engineer  
+hoang.phuong.linh@example.com · 0905 000 336 · Đà Nẵng / Da Nang
+
+## Giới thiệu bản thân / About me
+4 năm kinh nghiệm / 4 yrs exp. Ứng tuyển Kỹ sư Kiểm thử Tự động (QA Automation) / QA Automation Engineer.
+
+## Công nghệ / Tech stack
+- Postman · Git · Java · SQL · Jira · JMeter · CI/CD · Cypress · Selenium
+
+## Kinh nghiệm / Employment history
+### Kỹ sư kiểm thử tự động / QA Automation Engineer — Công ty CP Phần mềm Hoa Sen
+*01/2024 - Hiện tại / Present*
+- Xây dựng bộ test tự động UI bằng Selenium và Java với hơn 73 test case
+- Worked with developers and product owners in Agile/Scrum sprints
+- Kiểm thử REST API bằng Postman và xác thực dữ liệu bằng SQL
+- Logged and tracked defects in Jira, achieving 73% defect detection before release
+
+### Kỹ sư kiểm thử / Junior QA Engineer — Ngân hàng số Kim Long (Khối CNTT)
+*02/2022 - 08/2024*
+- Kiểm thử REST API bằng Postman và xác thực dữ liệu bằng SQL
+- Logged and tracked defects in Jira, achieving 84% defect detection before release
+
+## Trình độ học vấn / Academic background
+- Kỹ sư Công nghệ thông tin / B.Eng. in Information Technology, Đại học Công nghệ - ĐHQGHN / VNU University of Engineering and Technology (2018 - 2022)
+
+## Ngoại ngữ / Languages
+- Tiếng Anh / English: TOEIC 850

@@ -1,0 +1,22 @@
+DO BAO MAI - Backend Developer (Java)
+do.bao.mai@example.com | 0983 000 910 | Ho Chi Minh City
+
+== PROFESSIONAL SUMMARY ==
+Recent graduate, seeking to contribute as a Backend Developer (Java).
+
+== EDUCATION ==
+B.Eng. in Information Technology, Hanoi University of Science and Technology (2022 - 2026)
+
+== WORK EXPERIENCE ==
+06/2025 - 12/2025       Intern - Manual QA Engineer - Công ty TNHH Phần mềm Hoa Sen
+                        - Basic SQL queries for test data verification
+                        - Wrote and executed manual test cases for web applications
+
+== SELECTED PROJECTS ==
+- Capstone: Library management website (Java Servlet, MySQL)
+
+== TECHNICAL SKILLS ==
+Spring Boot, REST API, jQuery, WordPress
+
+== LANGUAGES ==
+English: Reading comprehension

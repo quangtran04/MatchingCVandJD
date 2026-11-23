@@ -476,101 +476,179 @@ function translateReason(reason) {
   return text;
 }
 
-function tr(value) {
+const VN_ACCENT_RE =
+  /[ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼẾỀỂỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỴỶỸàáâãèéêìíòóôõùúăđĩũơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/;
+
+function hasViAccents(str) {
+  return VN_ACCENT_RE.test(String(str || ""));
+}
+
+function isLikelyEnOnly(str) {
+  const s = String(str || "").trim();
+  return /[A-Za-z]/.test(s) && !hasViAccents(s);
+}
+
+function pickFromSlashPair(segment, lang) {
+  const parts = segment.split(" / ");
+  if (parts.length !== 2) return segment;
+  const left = parts[0].trim();
+  const right = parts[1].trim();
+  if (!left || !right) return segment;
+  const leftVi = hasViAccents(left);
+  const rightVi = hasViAccents(right);
+  const leftEn = isLikelyEnOnly(left);
+  const rightEn = isLikelyEnOnly(right);
+  if (leftVi && rightEn) return lang === "vi" ? left : right;
+  if (leftEn && rightVi) return lang === "vi" ? right : left;
+  return segment;
+}
+
+function pickBilingualText(value, lang = resultLang) {
   if (value == null) return "";
   const str = String(value);
+  if (!str.includes(" / ")) return str;
+
+  // Check whole-string bilingual pair first (e.g. "Dự án cá nhân: ... / Personal project: ...")
+  const wholeParts = str.split(" / ");
+  if (wholeParts.length === 2) {
+    const [a, b] = wholeParts.map((s) => s.trim());
+    const balancedColon = a.includes(":") === b.includes(":");
+    const hasAsymSep =
+      /(?: — | @ | - )/.test(a) !== /(?: — | @ | - )/.test(b);
+    if (balancedColon && !hasAsymSep) {
+      const picked = pickFromSlashPair(str, lang);
+      if (picked !== str) return picked;
+    }
+  }
+
+  // Otherwise resolve clause-by-clause while preserving delimiters
+  // Only split on ". " for real sentence boundaries (avoid splitting "B.Eng. in ...", "TP. HCM")
+  return str
+    .split(/( — | @ |: |, | - |(?<!\b(?:TP|B\.Eng|B\.Sc|M\.Eng|M\.Sc|Ph\.D|Mr|Ms|Dr))\. (?=[A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠƯẠ-Ỹ0-9]))/)
+    .map((chunk) => (chunk.includes(" / ") ? pickFromSlashPair(chunk, lang) : chunk))
+    .join("");
+}
+
+function filterBilingualList(values, lang = resultLang) {
+  if (!Array.isArray(values) || !values.length) return [];
+  const cleaned = values.map((v) => pickBilingualText(v, lang));
+  if (cleaned.length < 2) return cleaned;
+
+  const isViItem = (s) => hasViAccents(s);
+  const isEnSentence = (s) => isLikelyEnOnly(s) && s.trim().split(/\s+/).length >= 3;
+
+  const hasVi = cleaned.some(isViItem);
+  const hasEn = cleaned.some(isEnSentence);
+  if (hasVi && hasEn) {
+    const filtered =
+      lang === "vi"
+        ? cleaned.filter((s) => !isEnSentence(s))
+        : cleaned.filter((s) => !isViItem(s));
+    if (filtered.length) return filtered;
+  }
+  return cleaned;
+}
+
+function tr(value) {
+  if (value == null) return "";
+  const str = pickBilingualText(String(value), resultLang);
   if (!str.trim()) return str;
   return contentTranslations[resultLang]?.get(str) ?? str;
 }
 
-function collectCvTexts(profile) {
+function collectCvTexts(profile, lang = resultLang) {
   if (!profile) return [];
   const texts = [];
+  const add = (v) => {
+    if (v) texts.push(pickBilingualText(v, lang));
+  };
   const info = profile.personal_info || {};
-  if (info.headline) texts.push(info.headline);
-  if (info.location) texts.push(info.location);
-  if (profile.summary) texts.push(profile.summary);
-  (profile.skills || []).forEach((s) => texts.push(s));
-  (profile.languages || []).forEach((s) => texts.push(s));
-  (profile.certificates || []).forEach((s) => texts.push(s));
+  add(info.headline);
+  add(info.location);
+  add(profile.summary);
+  (profile.skills || []).forEach(add);
+  filterBilingualList(profile.languages || [], lang).forEach(add);
+  filterBilingualList(profile.certificates || [], lang).forEach(add);
   ["education", "experience", "projects"].forEach((key) => {
     (profile[key] || []).forEach((entry) => {
-      if (entry?.title) texts.push(entry.title);
-      if (entry?.details) texts.push(entry.details);
+      add(entry?.title);
+      add(entry?.details);
     });
   });
   return texts;
 }
 
-function collectJdTexts(profile) {
+function collectJdTexts(profile, lang = resultLang) {
   if (!profile) return [];
   const texts = [];
+  const add = (v) => {
+    if (v) texts.push(pickBilingualText(v, lang));
+  };
   const job = profile.job_info || {};
   const desc = profile.job_description || {};
   const req = profile.requirements || {};
   [job.title, job.department, job.location, job.level, job.employment_type, desc.description].forEach(
-    (v) => {
-      if (v) texts.push(v);
-    }
+    add
   );
   [
-    ...(desc.responsibilities || []),
-    ...(req.mandatory_skills || []),
-    ...(req.experience || []),
-    ...(req.education || []),
-    ...(req.fields_of_study || []),
-    ...(req.languages || []),
-    ...(req.certificates || []),
-    ...(req.other_requirements || []),
-    ...(profile.preferred_requirements || []),
-  ].forEach((v) => {
-    if (v) texts.push(v);
-  });
+    ...filterBilingualList(desc.responsibilities || [], lang),
+    ...filterBilingualList(req.mandatory_skills || [], lang),
+    ...filterBilingualList(req.experience || [], lang),
+    ...filterBilingualList(req.education || [], lang),
+    ...filterBilingualList(req.fields_of_study || [], lang),
+    ...filterBilingualList(req.languages || [], lang),
+    ...filterBilingualList(req.certificates || [], lang),
+    ...filterBilingualList(req.other_requirements || [], lang),
+    ...filterBilingualList(profile.preferred_requirements || [], lang),
+  ].forEach(add);
   return texts;
 }
 
-function collectMatchTexts(report) {
+function collectMatchTexts(report, lang = resultLang) {
   if (!report) return [];
   const texts = [];
+  const add = (v) => {
+    if (v) texts.push(pickBilingualText(v, lang));
+  };
   (report.responsibility_matches || []).forEach((item) => {
-    if (item.jd_text) texts.push(item.jd_text);
-    if (item.cv_section) texts.push(item.cv_section);
-    if (item.cv_evidence) texts.push(item.cv_evidence);
+    add(item.jd_text);
+    add(item.cv_section);
+    add(item.cv_evidence);
   });
   (report.matched_skills || []).forEach((item) => {
-    if (item.jd_evidence) texts.push(item.jd_evidence);
-    if (item.cv_evidence) texts.push(item.cv_evidence);
+    add(item.jd_evidence);
+    add(item.cv_evidence);
   });
   const skillEv = report.scores?.skill_match?.evidence || {};
   [...(skillEv.required || []), ...(skillEv.preferred || [])].forEach((item) => {
-    if (item?.evidence) texts.push(item.evidence);
+    add(item?.evidence);
   });
   const expEv = report.scores?.experience_match?.evidence || {};
-  if (expEv.jd_text) texts.push(expEv.jd_text);
-  (expEv.cv_entries || []).forEach((v) => texts.push(v));
+  add(expEv.jd_text);
+  (expEv.cv_entries || []).forEach(add);
   const eduEv = report.scores?.education_match?.evidence || {};
   [
     ...(eduEv.jd_text || []),
     ...(eduEv.cv_entries || []),
     ...(eduEv.jd_fields || []),
     ...(eduEv.cv_fields || []),
-  ].forEach((v) => texts.push(v));
+  ].forEach(add);
   (report.project_matches || []).forEach((item) => {
-    if (item.project_evidence) texts.push(item.project_evidence);
+    add(item.project_evidence);
   });
   (report.other_requirements || []).forEach((item) => {
-    if (item.jd_text) texts.push(item.jd_text);
-    if (item.cv_section) texts.push(item.cv_section);
-    if (item.cv_evidence) texts.push(item.cv_evidence);
+    add(item.jd_text);
+    add(item.cv_section);
+    add(item.cv_evidence);
   });
   return texts;
 }
 
-function collectBatchTexts(data) {
+function collectBatchTexts(data, lang = resultLang) {
   if (!data) return [];
   const texts = [];
   const jdTitle = data.jd_profile?.job_info?.title;
-  if (jdTitle) texts.push(jdTitle);
+  if (jdTitle) texts.push(pickBilingualText(jdTitle, lang));
   return texts;
 }
 
@@ -681,10 +759,10 @@ async function setResultLang(lang) {
   rerenderActiveResults();
 
   const textsToTranslate = [
-    ...(extractedProfiles ? collectCvTexts(extractedProfiles.cv_profile) : []),
-    ...(extractedProfiles ? collectJdTexts(extractedProfiles.jd_profile) : []),
-    ...(lastMatchReport ? collectMatchTexts(lastMatchReport) : []),
-    ...(lastBatchResponse ? collectBatchTexts(lastBatchResponse) : []),
+    ...(extractedProfiles ? collectCvTexts(extractedProfiles.cv_profile, lang) : []),
+    ...(extractedProfiles ? collectJdTexts(extractedProfiles.jd_profile, lang) : []),
+    ...(lastMatchReport ? collectMatchTexts(lastMatchReport, lang) : []),
+    ...(lastBatchResponse ? collectBatchTexts(lastBatchResponse, lang) : []),
   ];
   if (!textsToTranslate.length) return;
 
@@ -916,7 +994,7 @@ function renderEntries(entries, emptyText = t().cv_empty_entry) {
             <span class="entry-index">${String(idx + 1).padStart(2, "0")}</span>
             <b>${escapeHtml(mainTitle)}</b>
           </div>
-          ${entry.date ? `<time>${escapeHtml(entry.date)}</time>` : ""}
+          ${entry.date ? `<time>${escapeHtml(pickBilingualText(entry.date, resultLang))}</time>` : ""}
         </div>
         ${
           metaBadges.length
@@ -934,13 +1012,14 @@ function renderEntries(entries, emptyText = t().cv_empty_entry) {
 }
 
 function renderList(values, tags = false, emptyText = t().cv_empty_list, numbered = false) {
-  if (!values?.length) {
+  const displayValues = filterBilingualList(values || [], resultLang);
+  if (!displayValues.length) {
     return `<div class="empty-state-box compact"><span>—</span><p class="empty-value">${escapeHtml(emptyText)}</p></div>`;
   }
   if (tags) {
-    return `<div class="tag-list">${values.map((value) => `<span>${escapeHtml(localizeFieldValue(value))}</span>`).join("")}</div>`;
+    return `<div class="tag-list">${displayValues.map((value) => `<span>${escapeHtml(localizeFieldValue(value))}</span>`).join("")}</div>`;
   }
-  return `<div class="field-list compact-list">${values
+  return `<div class="field-list compact-list">${displayValues
     .map(
       (value, idx) =>
         `<div class="field-bullet-item">
@@ -1035,12 +1114,13 @@ function renderProfile(profile) {
 }
 
 function requirementGroup(label, values, tags = false, emptyText = t().not_mentioned) {
+  const displayValues = filterBilingualList(values || [], resultLang);
   return `<div class="req-group-card">
     <div class="req-group-header">
       <b>${escapeHtml(label)}</b>
-      ${values?.length ? `<span class="req-group-count">${values.length}</span>` : ""}
+      ${displayValues.length ? `<span class="req-group-count">${displayValues.length}</span>` : ""}
     </div>
-    ${renderList(values, tags, emptyText)}
+    ${renderList(displayValues, tags, emptyText)}
   </div>`;
 }
 
@@ -1090,20 +1170,20 @@ function renderJobProfile(profile) {
     </div>
   </article>`;
 
-  const respCount = description.responsibilities?.length
-    ? dict.count_tasks(description.responsibilities.length)
-    : "";
-  const prefCount = profile.preferred_requirements?.length
-    ? dict.count_items(profile.preferred_requirements.length)
-    : "";
-  const skillsTotal =
-    (requirements.mandatory_skills?.length || 0) + (requirements.technologies_tools?.length || 0);
+  const respList = filterBilingualList(description.responsibilities || [], resultLang);
+  const prefList = filterBilingualList(profile.preferred_requirements || [], resultLang);
+  const mandList = filterBilingualList(requirements.mandatory_skills || [], resultLang);
+  const expList = filterBilingualList(requirements.experience || [], resultLang);
+  const langList = filterBilingualList(requirements.languages || [], resultLang);
+  const otherList = filterBilingualList(requirements.other_requirements || [], resultLang);
+
+  const respCount = respList.length ? dict.count_tasks(respList.length) : "";
+  const prefCount = prefList.length ? dict.count_items(prefList.length) : "";
+  const skillsTotal = mandList.length + (requirements.technologies_tools?.length || 0);
   const skillsBadge = skillsTotal ? dict.count_items(skillsTotal) : "";
-  const expBadge = requirements.experience?.length ? dict.count_items(requirements.experience.length) : "";
-  const langBadge = requirements.languages?.length ? dict.count_items(requirements.languages.length) : "";
-  const otherBadge = requirements.other_requirements?.length
-    ? dict.count_items(requirements.other_requirements.length)
-    : "";
+  const expBadge = expList.length ? dict.count_items(expList.length) : "";
+  const langBadge = langList.length ? dict.count_items(langList.length) : "";
+  const otherBadge = otherList.length ? dict.count_items(otherList.length) : "";
 
   const skillsTechBody = `<div class="req-groups-grid">
     ${requirementGroup(dict.jd_mandatory_skills, requirements.mandatory_skills)}
@@ -1222,11 +1302,29 @@ function reportSection(id, number, title, subtitle, metric, matched, missing, so
   </article>`;
 }
 
+function filterBilingualObjects(items, getText, lang = resultLang) {
+  if (!Array.isArray(items) || items.length < 2) return items || [];
+  const isViItem = (item) => hasViAccents(getText(item));
+  const isEnSentence = (item) => {
+    const s = String(getText(item) || "").trim();
+    return isLikelyEnOnly(s) && s.split(/\s+/).length >= 3;
+  };
+  if (items.some(isViItem) && items.some(isEnSentence)) {
+    const filtered =
+      lang === "vi"
+        ? items.filter((item) => !isEnSentence(item))
+        : items.filter((item) => !isViItem(item));
+    if (filtered.length) return filtered;
+  }
+  return items;
+}
+
 function reportRoleSection(metric, tasks) {
   const dict = t();
   const score = metric.score;
   const reasonText = translateReason(metric.reason);
-  const rows = tasks
+  const displayTasks = filterBilingualObjects(tasks, (item) => item.jd_text, resultLang);
+  const rows = displayTasks
     .map((task, index) => {
       const label =
         task.status === "strong"
