@@ -185,10 +185,16 @@ def extract_job_profile(text: str) -> dict[str, object]:
     if not lang_lines and overview_lines:
         lang_lines = _matching_lines(overview_lines, LANGUAGE_PATTERN)
 
+    job_info = _job_info(lines, sections)
+    overview_paragraphs = [
+        line for line in desc_paragraphs if not _is_non_overview_line(line, job_info["title"])
+    ]
+    description_text = _collapse(" ".join(overview_paragraphs)) or job_info["title"]
+
     return {
-        "job_info": _job_info(lines, sections),
+        "job_info": job_info,
         "job_description": {
-            "description": _collapse(" ".join(desc_paragraphs)),
+            "description": description_text,
             "responsibilities": _clean_bullets(resp_bullets),
         },
         "requirements": {
@@ -211,6 +217,44 @@ def extract_job_profile(text: str) -> dict[str, object]:
         },
         "preferred_requirements": _clean_bullets(preferred_lines),
     }
+
+
+def _is_non_overview_line(line: str, title_value: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return True
+    # Metadata lines (Location | Salary | Type, etc.)
+    if re.search(
+        r"(?:^|\|)\s*(?:location|salary|type|employment\s+type|department|workplace|"
+        r"địa\s+điểm|nơi\s+làm\s+việc|mức\s+lương|thu\s+nhập|hình\s+thức|phòng\s*ban|"
+        r"vị\s+trí|position|job\s+title|cấp\s+bậc|thời\s+gian\s+làm\s+việc)\s*[:\-]",
+        stripped,
+        re.IGNORECASE,
+    ):
+        return True
+    if "|" in stripped and re.search(
+        r"\b(?:salary|mức\s+lương|full-time|part-time|toàn\s+thời\s+gian|bán\s+thời\s+gian)\b",
+        stripped,
+        re.IGNORECASE,
+    ):
+        return True
+    # Numbered subsection headings (e.g. "1. Nghiên cứu và phát triển hệ thống RAG:")
+    if re.match(r"^(?:\d+|[IVXLCDM]+)[\.\)]\s+\S+", stripped, re.IGNORECASE):
+        return True
+    # Short category subheadings ending with colon (e.g. "Computer Vision:", "Agentic AI:", "Chung:")
+    if stripped.endswith(":") and len(stripped.split()) <= 8:
+        return True
+    # Standalone title line or ALL-CAPS header
+    norm_line = _normalize_key(stripped)
+    norm_title = _normalize_key(title_value)
+    if norm_title and norm_line == norm_title:
+        return True
+    if stripped.isupper() and len(stripped.split()) <= 8:
+        return True
+    # Too short to be a descriptive overview sentence
+    if len(stripped.split()) < 5:
+        return True
+    return False
 
 
 def _is_preferred_line(line: str) -> bool:
@@ -501,6 +545,134 @@ def _split_specialization_tags(lines: list[str]) -> list[str]:
     return _unique(tags)
 
 
+LOCATION_LABEL_RE = re.compile(
+    r"(?:^|[\|;]\s*)(?:[•\-–—*+]\s*)?"
+    r"(?:work\s*location|workplace|office\s*address|location|address|"
+    r"nơi\s+làm\s+việc|địa\s+điểm(?:\s+làm\s+việc)?|địa\s+chỉ(?:\s+làm\s+việc|\s+công\s+ty)?)"
+    r"(?:\s*\([^)]*\))?\s*[:\-]?\s*(.*)$",
+    re.IGNORECASE,
+)
+
+LOCATION_STOP_INLINE_RE = re.compile(
+    r"\s*(?:\||"
+    r"(?:mức\s+lương|thu\s+nhập|lương|salary|hình\s+thức(?:\s+làm\s+việc)?|employment\s+type|job\s+type|type|"
+    r"số\s+lượng|kinh\s+nghiệm|cấp\s+bậc|hạn\s+nộp|deadline|liên\s+hệ|contact)\s*[:\-]|"
+    r"\b(?:thời\s+gian\s+làm\s+việc|working\s+hours?|cách\s+thức\s+ứng\s+tuyển|how\s+to\s+apply|"
+    r"hồ\s+sơ\s+bao\s+gồm|quyền\s+lợi|mô\s+tả\s+công\s+việc|job\s+description|"
+    r"yêu\s+cầu\s+(?:ứng\s+viên|công\s+việc)|nice\s+to\s+have)\b|"
+    r"\(?(?:trước|sau)\s+sáp\s+nhập\s*:)",
+    re.IGNORECASE,
+)
+
+LOCATION_NEXTLINE_STOP_RE = re.compile(
+    r"^(?:[•\-–—*+]\s*)?(?:"
+    r"thời\s+gian\s+làm\s+việc|working\s+hours?|thu\s+nhập|mức\s+lương|salary|lương|"
+    r"cách\s+thức\s+ứng\s+tuyển|how\s+to\s+apply|hồ\s+sơ\s+bao\s+gồm|quyền\s+lợi|benefits?|"
+    r"hạn\s+nộp|deadline|liên\s+hệ|contact|thông\s+tin\s+(?:chung|khác|liên\s+hệ)|"
+    r"hình\s+thức|kinh\s+nghiệm|cấp\s+bậc|số\s+lượng|"
+    r"\(?\s*(?:trước|sau)\s+sáp\s+nhập\b)",
+    re.IGNORECASE,
+)
+
+
+def _clean_location_value(raw: str) -> str:
+    value = LOCATION_STOP_INLINE_RE.split(raw, maxsplit=1)[0]
+    value = re.sub(r"^(?:[•\-–—*+]\s*|\d+[\.\)]\s*)+", "", value).strip(" .|;:-")
+    # Preserve balanced parentheses (e.g. district notes), only strip stray unmatched ones
+    while value.startswith("(") and value.count("(") > value.count(")"):
+        value = value[1:].strip()
+    while value.endswith(")") and value.count(")") > value.count("("):
+        value = value[:-1].strip()
+    return value.strip(" .|;-")
+
+
+def _extract_location(lines: list[str]) -> str:
+    for idx, line in enumerate(lines):
+        match = LOCATION_LABEL_RE.search(line)
+        if not match:
+            continue
+        same_line = _clean_location_value(match.group(1))
+        if same_line:
+            return same_line
+
+        collected: list[str] = []
+        seen_keys: set[str] = set()
+        for next_line in lines[idx + 1 :]:
+            stripped = next_line.strip()
+            if not stripped:
+                if collected:
+                    break
+                continue
+            if _section_name(stripped) or LOCATION_NEXTLINE_STOP_RE.match(stripped):
+                break
+            if re.match(r"^\d+[\.\)]\s+", stripped) and collected:
+                break
+            cleaned = _clean_location_value(stripped)
+            if not cleaned:
+                continue
+            key = _normalize_key(cleaned)
+            if key in seen_keys:
+                break
+            seen_keys.add(key)
+            collected.append(cleaned)
+            # Only continue collecting if subsequent lines are explicit bulleted branches
+            if not stripped.startswith(("•", "-", "–", "—", "*", "+")):
+                break
+        if collected:
+            return " · ".join(collected)
+    return ""
+
+
+DEPARTMENT_LABEL_RE = re.compile(
+    r"(?:^|[\|;]\s*)(?:[•\-–—*+]\s*)?"
+    r"(?:department|division|business\s+unit|team|"
+    r"phòng\s*ban|bộ\s*phận|khối|đội\s*ngũ)\s*[:\-]\s*(.+)$",
+    re.IGNORECASE,
+)
+
+DEPARTMENT_HEADING_RE = re.compile(
+    r"^(?:[•\-–—*+]\s*)?(?:department|division|phòng\s*ban|bộ\s*phận)\s*[:\-]?$",
+    re.IGNORECASE,
+)
+
+DEPARTMENT_STOP_INLINE_RE = re.compile(
+    r"\s*(?:\||"
+    r"(?:mức\s+lương|thu\s+nhập|lương|salary|địa\s+điểm|nơi\s+làm\s+việc|địa\s+chỉ|location|address|"
+    r"hình\s+thức(?:\s+làm\s+việc)?|employment\s+type|job\s+type|type|cấp\s+bậc|level|"
+    r"số\s+lượng|kinh\s+nghiệm|hạn\s+nộp|deadline|liên\s+hệ|contact)\s*[:\-])",
+    re.IGNORECASE,
+)
+
+
+def _extract_department(lines: list[str], spec_tags: list[str], title_value: str) -> str:
+    for idx, line in enumerate(lines):
+        match = DEPARTMENT_LABEL_RE.search(line)
+        if match:
+            raw = DEPARTMENT_STOP_INLINE_RE.split(match.group(1), maxsplit=1)[0]
+            cleaned = re.sub(r"^(?:[•\-–—*+]\s*)+", "", raw).strip(" .|;:-")
+            if cleaned and len(cleaned) <= 80:
+                return cleaned
+        if DEPARTMENT_HEADING_RE.match(line.strip()):
+            for next_line in lines[idx + 1 :]:
+                stripped = next_line.strip()
+                if not stripped:
+                    continue
+                if _section_name(stripped) or LOCATION_NEXTLINE_STOP_RE.match(stripped):
+                    break
+                cleaned = DEPARTMENT_STOP_INLINE_RE.split(stripped, maxsplit=1)[0]
+                cleaned = re.sub(r"^(?:[•\-–—*+]\s*)+", "", cleaned).strip(" .|;:-")
+                if cleaned and len(cleaned) <= 80:
+                    return cleaned
+                break
+
+    if spec_tags:
+        domain_tags = [tag for tag in spec_tags if tag != title_value]
+        if domain_tags:
+            return " · ".join(domain_tags)
+
+    return "Không có"
+
+
 def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str]:
     content = " ".join(lines)
     spec_tags = _split_specialization_tags(sections.get("specialization", []))
@@ -510,27 +682,8 @@ def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str
         content,
         re.IGNORECASE,
     )
-    location_match = re.search(
-        r"(?:work\s*location|location|nơi làm việc|địa điểm(?:\s+làm\s+việc)?)"
-        r"(?:\s*\([^)]*\))?\s*[:\-]?\s*(.+)",
-        content,
-        re.IGNORECASE,
-    )
-    department_match = re.search(
-        r"(?:department|team|phòng ban|đội ngũ|bộ phận)\s*[:\-]?\s*([A-Za-zÀ-ỹ &]{2,50})",
-        content,
-        re.IGNORECASE,
-    )
 
-    location_str = ""
-    if location_match:
-        raw_location = location_match.group(1).strip()
-        split_pattern = (
-            r"(?:\s*1\.\s*Tòa|\s*(?:sau|trước)\s*sáp nhập:?"
-            r"|\s*(?:Thời gian làm việc|Cách thức ứng tuyển|Hồ sơ bao gồm|Quyền lợi)\b)"
-        )
-        parts = re.split(split_pattern, raw_location, flags=re.IGNORECASE)
-        location_str = parts[0].strip(" .-|()")
+    location_str = _extract_location(lines)
 
     title_value = title_match.group(1).strip() if title_match else ""
     if title_value:
@@ -562,13 +715,7 @@ def _job_info(lines: list[str], sections: dict[str, list[str]]) -> dict[str, str
         if not title_value or title_value.lower() in {"chưa xác định"}:
             title_value = "AI Research & Development Intern"
 
-    department_value = department_match.group(1).strip() if department_match else ""
-    if "để triển khai" in department_value.lower() or len(department_value) > 30:
-        department_value = "AI & Computer Vision"
-    if not department_value and spec_tags:
-        domain_tags = [tag for tag in spec_tags if tag != title_value]
-        if domain_tags:
-            department_value = " · ".join(domain_tags)
+    department_value = _extract_department(lines, spec_tags, title_value)
 
     if re.search(r"\b(intern|thực tập|internship)\b", content, re.IGNORECASE):
         level = "Intern"

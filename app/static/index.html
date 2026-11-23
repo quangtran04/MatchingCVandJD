@@ -10,8 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/styles.css?v=20261123-batch1" />
-    <link rel="stylesheet" href="/static/match-report.css?v=20261123-batch1" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261123-ui3" />
+    <link rel="stylesheet" href="/static/match-report.css?v=20261123-ui3" />
   </head>
   <body>
     <div class="page-glow glow-one"></div>
@@ -110,7 +110,7 @@
                 <div class="file-selected" id="cv-file-name" aria-live="polite"></div>
               </div>
 
-              <div class="or-divider"><span>hoặc dán / kiểm tra văn bản thô</span></div>
+              <div class="or-divider"><span>hoặc dán văn bản trực tiếp</span></div>
               <label class="sr-only" for="cv-text">Nội dung CV</label>
               <textarea id="cv-text" placeholder="Dán nội dung CV của ứng viên tại đây…"></textarea>
               <div class="textarea-footer"><span id="cv-count">0 ký tự</span><span>Ctrl+V để dán nhanh</span></div>
@@ -133,7 +133,7 @@
                 <div class="file-selected" id="jd-file-name" aria-live="polite"></div>
               </div>
 
-              <div class="or-divider"><span>hoặc dán / kiểm tra văn bản thô</span></div>
+              <div class="or-divider"><span>hoặc dán văn bản trực tiếp</span></div>
               <label class="sr-only" for="jd-text">Nội dung JD</label>
               <textarea id="jd-text" placeholder="Dán mô tả công việc (JD) tại đây…"></textarea>
               <div class="textarea-footer"><span id="jd-count">0 ký tự</span><span>Ctrl+V để dán nhanh</span></div>
@@ -157,21 +157,25 @@
         <section id="extraction-result" class="stage-view results-section hidden" aria-live="polite">
           <div class="result-heading">
             <div>
-              <p class="section-label">BƯỚC 02 · HỒ SƠ ĐÃ CẤU TRÚC</p>
-              <h2>Thông tin bóc tách từ CV &amp; JD</h2>
+              <p class="section-label" data-res-i18n="ext_eyebrow">BƯỚC 02 · HỒ SƠ ĐÃ CẤU TRÚC</p>
+              <h2 data-res-i18n="ext_title">Thông tin bóc tách từ CV &amp; JD</h2>
             </div>
             <div class="result-actions">
-              <span class="status-tag">● Sẵn sàng đối chiếu</span>
-              <button class="text-button" id="back-to-input">← Chỉnh sửa văn bản đầu vào</button>
+              <div class="result-lang-switch" role="group" aria-label="Ngôn ngữ hiển thị kết quả">
+                <button type="button" class="lang-switch-btn active" data-result-lang="vi" aria-pressed="true">VI</button>
+                <button type="button" class="lang-switch-btn" data-result-lang="en" aria-pressed="false">EN</button>
+              </div>
+              <span class="status-tag" data-res-i18n="ext_status">● Sẵn sàng đối chiếu</span>
+              <button class="text-button" id="back-to-input" data-res-i18n="ext_back_input">← Chỉnh sửa văn bản đầu vào</button>
             </div>
           </div>
           <div class="extraction-toolbar">
             <div class="extraction-tabs" role="tablist" aria-label="Nguồn thông tin đã trích xuất">
               <button class="extraction-tab active" id="cv-tab" type="button" role="tab" aria-selected="true" data-source="cv">
-                <span>01</span> Hồ sơ ứng viên (CV)
+                <span>01</span> <em class="tab-label-text" data-res-i18n="ext_tab_cv">Hồ sơ ứng viên (CV)</em>
               </button>
               <button class="extraction-tab" id="jd-tab" type="button" role="tab" aria-selected="false" data-source="jd">
-                <span>02</span> Mô tả công việc (JD)
+                <span>02</span> <em class="tab-label-text" data-res-i18n="ext_tab_jd">Mô tả công việc (JD)</em>
               </button>
             </div>
           </div>
@@ -310,12 +314,16 @@
         <section id="batch-results" class="results-section hidden" aria-live="polite">
           <div class="result-heading">
             <div>
-              <p class="section-label">KẾT QUẢ XẾP HẠNG ĐA ỨNG VIÊN</p>
+              <p class="section-label" data-res-i18n="batch_eyebrow">KẾT QUẢ XẾP HẠNG ĐA ỨNG VIÊN</p>
               <h2 id="batch-result-title">Bảng xếp hạng ứng viên</h2>
             </div>
             <div class="result-actions">
-              <button class="mini-action-btn" id="export-csv-btn">↓ Xuất bảng CSV</button>
-              <button class="text-button" id="batch-edit-inputs-btn">← Thay đổi JD / Cấu hình</button>
+              <div class="result-lang-switch" role="group" aria-label="Ngôn ngữ hiển thị kết quả">
+                <button type="button" class="lang-switch-btn active" data-result-lang="vi" aria-pressed="true">VI</button>
+                <button type="button" class="lang-switch-btn" data-result-lang="en" aria-pressed="false">EN</button>
+              </div>
+              <button class="mini-action-btn" id="export-csv-btn" data-res-i18n="batch_export_csv">↓ Xuất bảng CSV</button>
+              <button class="text-button" id="batch-edit-inputs-btn" data-res-i18n="batch_edit_inputs">← Thay đổi JD / Cấu hình</button>
             </div>
           </div>
 
@@ -324,21 +332,21 @@
           <div class="batch-filter-bar">
             <input type="search" id="batch-search-input" placeholder="Tìm ứng viên theo tên, tên tệp hoặc kỹ năng thiếu…" />
             <div class="lang-filter-pills" id="lang-filter-pills">
-              <button type="button" class="filter-pill active" data-lang="all">Tất cả</button>
-              <button type="button" class="filter-pill" data-lang="vi">Tiếng Việt</button>
-              <button type="button" class="filter-pill" data-lang="en">Tiếng Anh</button>
-              <button type="button" class="filter-pill" data-lang="bi">Song ngữ</button>
+              <button type="button" class="filter-pill active" data-lang="all" data-res-i18n="filter_all">Tất cả</button>
+              <button type="button" class="filter-pill" data-lang="vi" data-res-i18n="filter_vi">Tiếng Việt</button>
+              <button type="button" class="filter-pill" data-lang="en" data-res-i18n="filter_en">Tiếng Anh</button>
+              <button type="button" class="filter-pill" data-lang="bi" data-res-i18n="filter_bi">Song ngữ</button>
             </div>
             <label class="sort-select-wrap">
-              <span>Sắp xếp theo:</span>
+              <span data-res-i18n="sort_label">Sắp xếp theo:</span>
               <select id="batch-sort-select">
-                <option value="overall">Điểm tổng (Đề xuất)</option>
-                <option value="skill">Kỹ năng chuyên môn</option>
-                <option value="job_fit">Mô tả công việc</option>
-                <option value="experience">Số năm kinh nghiệm</option>
-                <option value="baseline_keyword">Baseline Từ khóa thuần</option>
-                <option value="baseline_tfidf">Baseline TF-IDF toàn văn</option>
-                <option value="baseline_sbert">Baseline SBERT đa ngôn ngữ</option>
+                <option value="overall" data-res-i18n="sort_overall">Điểm tổng (Đề xuất)</option>
+                <option value="skill" data-res-i18n="sort_skill">Kỹ năng chuyên môn</option>
+                <option value="job_fit" data-res-i18n="sort_job_fit">Mô tả công việc</option>
+                <option value="experience" data-res-i18n="sort_exp">Số năm kinh nghiệm</option>
+                <option value="baseline_keyword" data-res-i18n="sort_base_kw">Baseline Từ khóa thuần</option>
+                <option value="baseline_tfidf" data-res-i18n="sort_base_tfidf">Baseline TF-IDF toàn văn</option>
+                <option value="baseline_sbert" data-res-i18n="sort_base_sbert">Baseline SBERT đa ngôn ngữ</option>
               </select>
             </label>
           </div>
@@ -347,17 +355,17 @@
             <table class="ranking-table">
               <thead>
                 <tr>
-                  <th>Hạng</th>
-                  <th>Ứng viên &amp; Tệp CV</th>
-                  <th>Tổng điểm</th>
-                  <th>Mô tả CV</th>
-                  <th>Kỹ năng</th>
-                  <th>Kinh nghiệm</th>
-                  <th>Học vấn</th>
-                  <th>Thưởng DA</th>
+                  <th data-res-i18n="th_rank">Hạng</th>
+                  <th data-res-i18n="th_candidate">Ứng viên &amp; Tệp CV</th>
+                  <th data-res-i18n="th_overall">Tổng điểm</th>
+                  <th data-res-i18n="th_job_fit">Mô tả CV</th>
+                  <th data-res-i18n="th_skills">Kỹ năng</th>
+                  <th data-res-i18n="th_exp">Kinh nghiệm</th>
+                  <th data-res-i18n="th_edu">Học vấn</th>
+                  <th data-res-i18n="th_bonus">Thưởng DA</th>
                   <th id="th-baselines">Baseline (KW / TF-IDF)</th>
-                  <th>Thiếu bắt buộc</th>
-                  <th>Chi tiết</th>
+                  <th data-res-i18n="th_missing">Thiếu bắt buộc</th>
+                  <th data-res-i18n="th_detail">Chi tiết</th>
                 </tr>
               </thead>
               <tbody id="batch-ranking-body"></tbody>
@@ -370,26 +378,30 @@
       <section id="match-result" class="stage-view results-section hidden" aria-live="polite">
         <div id="batch-detail-banner" class="batch-detail-banner hidden">
           <div>
-            <span class="section-label" style="margin:0;color:#a3ecc1;">XEM CHI TIẾT TỪ BẢNG XẾP HẠNG</span>
+            <span class="section-label" style="margin:0;color:#a3ecc1;" data-res-i18n="detail_banner_eyebrow">XEM CHI TIẾT TỪ BẢNG XẾP HẠNG</span>
             <strong id="batch-detail-candidate-title">Hạng #1 — Ứng viên</strong>
           </div>
-          <button type="button" class="batch-back-btn" id="back-to-leaderboard-btn">← Quay lại bảng xếp hạng</button>
+          <button type="button" class="batch-back-btn" id="back-to-leaderboard-btn" data-res-i18n="detail_back_leaderboard">← Quay lại bảng xếp hạng</button>
         </div>
 
         <div class="result-heading">
           <div>
-            <p class="section-label">BÁO CÁO ĐÁNH GIÁ CHI TIẾT</p>
-            <h2>Mức độ phù hợp giữa CV &amp; JD</h2>
+            <p class="section-label" data-res-i18n="match_eyebrow">BÁO CÁO ĐÁNH GIÁ CHI TIẾT</p>
+            <h2 data-res-i18n="match_title">Mức độ phù hợp giữa CV &amp; JD</h2>
           </div>
           <div class="result-actions">
-            <span class="status-tag">● Đã phân tích</span>
-            <button class="text-button" id="back-to-extraction">← Xem lại hồ sơ trích xuất</button>
+            <div class="result-lang-switch" role="group" aria-label="Ngôn ngữ hiển thị kết quả">
+              <button type="button" class="lang-switch-btn active" data-result-lang="vi" aria-pressed="true">VI</button>
+              <button type="button" class="lang-switch-btn" data-result-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <span class="status-tag" data-res-i18n="match_status">● Đã phân tích</span>
+            <button class="text-button" id="back-to-extraction" data-res-i18n="match_back_ext">← Xem lại hồ sơ trích xuất</button>
           </div>
         </div>
         <div class="report-overview">
           <article class="report-overall">
             <div>
-              <p class="report-eyebrow">MỨC ĐỘ PHÙ HỢP TỔNG THỂ</p>
+              <p class="report-eyebrow" data-res-i18n="overall_eyebrow">MỨC ĐỘ PHÙ HỢP TỔNG THỂ</p>
               <h3 id="overall-title">Chưa đánh giá</h3>
               <p id="overall-summary"></p>
             </div>
@@ -399,15 +411,15 @@
         </div>
         <div class="report-warning" id="report-warning" role="status" hidden></div>
         <details class="report-bonus" id="project-bonus" hidden>
-          <summary><strong id="project-bonus-value"></strong><span id="project-bonus-summary"></span><em>Xem bằng chứng</em></summary>
+          <summary><strong id="project-bonus-value"></strong><span id="project-bonus-summary"></span><em data-res-i18n="bonus_view_evidence">Xem bằng chứng</em></summary>
           <div class="report-bonus-evidence" id="project-bonus-evidence"></div>
         </details>
         <div class="report-section-heading">
           <div>
-            <p class="section-label">ĐỐI CHIẾU CHI TIẾT</p>
-            <h3>JD cần gì, CV có bằng chứng gì?</h3>
+            <p class="section-label" data-res-i18n="compare_eyebrow">ĐỐI CHIẾU CHI TIẾT</p>
+            <h3 data-res-i18n="compare_title">JD cần gì, CV có bằng chứng gì?</h3>
           </div>
-          <p>Mỗi nhiệm vụ và yêu cầu trong JD đều được truy vết trực tiếp tới phần nội dung tương ứng trong CV.</p>
+          <p data-res-i18n="compare_desc">Mỗi nhiệm vụ và yêu cầu trong JD đều được truy vết trực tiếp tới phần nội dung tương ứng trong CV.</p>
         </div>
         <div class="report-sections" id="report-sections"></div>
       </section>
@@ -417,6 +429,6 @@
       <span>TalentLens · Hệ thống trích xuất, so khớp &amp; xếp hạng CV – JD</span>
       <span>Explainable NLP Matching · Taxonomy v1.3.0</span>
     </footer>
-    <script src="/static/app.js?v=20261123-batch1"></script>
+    <script src="/static/app.js?v=20261123-ui4"></script>
   </body>
 </html>

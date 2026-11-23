@@ -109,3 +109,80 @@ Có kiến thức tốt về: RESTful API; Thiết kế và tích hợp hệ th�
     assert len(reqs["mandatory_skills"]) == 2
     assert all("Có kinh nghiệm" not in item for item in reqs["mandatory_skills"])
 
+
+def test_extracts_clean_full_location_without_trailing_sections() -> None:
+    inline_jd = """
+Vị trí: Backend Developer
+Địa điểm: Hà Nội | Mức lương: 20 - 35 triệu VND | Hình thức: Toàn thời gian
+Mô tả công việc
+- Xây dựng RESTful API bằng Python và FastAPI.
+"""
+    assert extract_job_profile(inline_jd)["job_info"]["location"] == "Hà Nội"
+
+    multiline_jd = """
+Mô tả công việc
+- Phát triển ứng dụng AI.
+Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới)
+- Đà Nẵng: 38 Dương Thị Xuân Quý, Phường Ngũ Hành Sơn (Phường Ngũ Hành Sơn thuộc quận Ngũ Hành Sơn cũ)
+Thời gian làm việc
+Thứ 2 - Thứ 6 (08:00 - 17:00)
+"""
+    assert (
+        extract_job_profile(multiline_jd)["job_info"]["location"]
+        == "Đà Nẵng: 38 Dương Thị Xuân Quý, Phường Ngũ Hành Sơn (Phường Ngũ Hành Sơn thuộc quận Ngũ Hành Sơn cũ)"
+    )
+
+    street_jd = """
+Địa chỉ: Số 10 Lương Thế Vinh, Nam Từ Liêm, Hà Nội
+Mức lương: 15 - 20 triệu
+"""
+    assert (
+        extract_job_profile(street_jd)["job_info"]["location"]
+        == "Số 10 Lương Thế Vinh, Nam Từ Liêm, Hà Nội"
+    )
+
+
+def test_extracts_exact_department_or_khong_co() -> None:
+    explicit_jd = """
+Position: Frontend Developer
+Department: Digital Banking Platform | Location: Hanoi
+Responsibilities
+- Collaborate with Backend, Design and QA teams in Agile.
+"""
+    assert extract_job_profile(explicit_jd)["job_info"]["department"] == "Digital Banking Platform"
+
+    no_dept_jd = """
+Position: Frontend Developer
+Location: Ho Chi Minh City | Type: Full-time
+Responsibilities
+- Collaborate with Backend, Design and QA teams in Agile.
+"""
+    assert extract_job_profile(no_dept_jd)["job_info"]["department"] == "Không có"
+
+
+def test_role_overview_excludes_metadata_and_falls_back_to_job_title() -> None:
+    meta_only_jd = """
+FRONTEND DEVELOPER (REACT)
+Location: Ho Chi Minh City | Salary: VND 15 - 30 million | Type: Full-time
+RESPONSIBILITIES
+- Develop web interfaces with React and TypeScript.
+- Integrate REST APIs and optimize performance.
+"""
+    profile = extract_job_profile(meta_only_jd)
+    assert profile["job_description"]["description"] == "FRONTEND DEVELOPER (REACT)"
+
+    with_overview_jd = """
+Mô tả công việc
+Chúng tôi đang xây dựng nền tảng thương mại điện tử ứng dụng AI cho doanh nghiệp vừa và nhỏ.
+Computer Vision:
+- Xây dựng mô hình nhận diện hình ảnh.
+"""
+    profile2 = extract_job_profile(with_overview_jd)
+    assert profile2["job_description"]["description"] == (
+        "Chúng tôi đang xây dựng nền tảng thương mại điện tử ứng dụng AI cho doanh nghiệp vừa và nhỏ."
+    )
+    assert "Computer Vision:" not in profile2["job_description"]["description"]
+
+
+
+

@@ -20,6 +20,7 @@ from app.application.matching import MatchConfig, match_profiles
 from app.application.profile_extraction import extract_cv_profile
 from app.application.skill_matching import taxonomy
 from app.application.text_extraction import TextExtractionError, extract_text
+from app.application.translation import translate_texts
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 DATASET_DIR = Path(__file__).resolve().parents[1] / "CV_JD_Dataset"
@@ -52,6 +53,11 @@ class BatchMatchRequest(BaseModel):
     config: MatchConfigPayload | None = None
     include_baselines: bool = True
     include_sbert: bool = False
+
+
+class TranslateTextsRequest(BaseModel):
+    target_lang: str = Field(pattern="^(vi|en)$")
+    texts: list[str] = Field(default_factory=list, max_length=500)
 
 
 def _to_match_config(payload: MatchConfigPayload | None) -> MatchConfig:
@@ -93,6 +99,12 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.post("/api/translate-texts", tags=["translation"])
+    async def translate_texts_endpoint(request: TranslateTextsRequest) -> dict[str, Any]:
+        """Translate extracted CV/JD/report text snippets to 'vi' or 'en' with caching."""
+        translations = translate_texts(request.texts, request.target_lang)
+        return {"target_lang": request.target_lang, "translations": translations}
 
     @app.post("/api/extract-text", tags=["extraction"])
     async def extract_uploaded_text(file: UploadFile = File(...)) -> dict[str, str]:  # noqa: B008
