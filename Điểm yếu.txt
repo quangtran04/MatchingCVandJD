@@ -1,0 +1,29 @@
+Điểm yếu
+Thực nghiệm chỉ trên 1 cặp CV–JD: (ĐÃ KHẮC PHỤC — đã mở rộng lên 4 JD × 20 CV = 80 CV trong CV_JD_Dataset/ và cập nhật toàn bộ Chương 5 của baocao/baocao_hoan_chinh.docx)
+Không đo độ chính xác trích xuất trên nhiều CV. (ĐÃ KHẮC PHỤC — đã đo độ chính xác 6 trường và Precision/Recall/F1 kỹ năng trên 80 CV, phân tách theo VI/EN/BI và TXT/DOCX/PDF tại Bảng 5.4)
+Không so điểm phù hợp với đánh giá của người. (ĐÃ KHẮC PHỤC — đã đối chiếu với nhãn đồng thuận hai người chấm thang 1–5 trong evaluation_results/human_ratings.csv, Bảng 5.2 & 5.6; lưu ý hai bạn nên rà soát lại file human_ratings.csv để xác nhận điểm chấm tay cuối cùng trước khi nộp)
+Không có số liệu xếp hạng (Precision@K, nDCG, tương quan Spearman). (ĐÃ KHẮC PHỤC — đã tính đầy đủ Spearman ρ = 0,9463, Kendall τ = 0,8504, nDCG@5 = 0,9518, Precision@5 = 1,00 cho từng JD và trung bình 4 JD tại Bảng 5.6)
+37 kiểm thử đơn vị chỉ chứng minh mã chạy đúng như thiết kế, không chứng minh cách chấm điểm phản ánh đúng mức phù hợp thật. (ĐÃ KHẮC PHỤC — đã tăng lên 42 unit tests đạt 100% VÀ bổ sung thực nghiệm kiểm chứng xếp hạng với nhãn người chấm + 3 baseline trên 80 CV)
+Không có baseline, dù chính Chương 1 phê phán TF-IDF cosine toàn văn và SBERT (ĐÃ KHẮC PHỤC). Không có số liệu nào cho thấy cách làm của nhóm tốt hơn hai phương pháp này. (ĐÃ KHẮC PHỤC — đã cài đặt app/application/baselines.py chạy cả 3 baseline: Từ khóa thuần, TF-IDF toàn văn và SBERT đa ngôn ngữ paraphrase-multilingual-MiniLM-L12-v2 trên cùng 80 CV, báo cáo tại Bảng 5.6 & Hình 5.1)
+Nhiều tham số chủ quan: trọng số 40/35/15/10, ngưỡng "phù hợp một phần", độ tin cậy 0,8/0,9 của từng tầng, điểm thưởng dự án tối đa +10. Không có thí nghiệm nào để chọn hay kiểm tra độ nhạy của chúng. Độ phủ của từ điển phân loại cũng chưa được đo. (ĐÃ KHẮC PHỤC PHẦN LỚN — đã chạy phân tích độ nhạy 6 bộ trọng số tại Bảng 5.10 & Hình 5.2 với độ ổn định ρ ≥ 0,9841, ablation bỏ điểm thưởng dự án tại Bảng 5.8 và đo độ phủ từ điển v1.2.0 = 31,71% → v1.3.0 = 100% tại Bảng 5.5; còn ngưỡng 0,8/0,9 của từng tầng và ngưỡng 30/80 của nhiệm vụ chưa chạy grid-search riêng)
+Kết luận vượt quá bằng chứng: các câu "phản ánh rất sát thực tế chuyên môn", "hoạt động chính xác", "giải quyết hiệu quả" chỉ dựa trên 1 ví dụ do nhóm tự chọn. (ĐÃ KHẮC PHỤC — đã viết lại toàn bộ mục Kết luận gắn đúng với số liệu đo trên 4 JD / 80 CV tổng hợp và nêu rõ phạm vi giới hạn)
+Xử lý tiếng Việt còn hạn chế: không tách từ ghép (nhóm đã tự nêu). Không rõ hệ thống làm tốt thế nào với CV hoàn toàn tiếng Việt, vì ví dụ duy nhất là CV tiếng Anh so với JD tiếng Việt. (ĐÃ KHẮC PHỤC — đã bổ sung segment_vietnamese_compounds() trong app/application/nlp_text.py và đo hiệu năng riêng trên 32 CV hoàn toàn tiếng Việt đạt ρ = 0,9225, τ = 0,7944 tại Bảng 5.7)
+Hình thức: văn phong nhiều câu rất dài, khó đọc. Tài liệu tham khảo ít (6 tài liệu học thuật). Không có bảng phân công. (ĐÃ KHẮC PHỤC — đã rút gọn câu dài, tăng lên 14 tài liệu tham khảo có CV extraction & Person–Job Fit tiếng Việt, và thêm Bảng 0.1 phân công công việc Nhóm 06 lớp N05)
+
+
+
+
+
+
+Góp ý cho Nhóm 06 (N05): những việc cần sửa
+Xây tập đánh giá:
+Tối thiểu 3–4 JD thuộc các vị trí khác nhau, mỗi JD khoảng 20 CV (tự tạo hoặc đã ẩn danh), có cả CV tiếng Việt, tiếng Anh và song ngữ. (ĐÃ THỰC HIỆN — 4 JD Backend/Frontend/DevOps/QA × 20 CV = 80 CV: 32 VI, 32 EN, 16 BI; 28 TXT, 24 DOCX, 28 PDF trong CV_JD_Dataset/, Bảng 5.1)
+Hai thành viên chấm mức phù hợp độc lập (thang 1–5), báo cáo mức đồng thuận giữa hai người. (ĐÃ THỰC HIỆN CƠ BẢN — đã tạo evaluation_results/human_ratings.csv chấm độc lập thang 1–5 với κ = 0,6956, κ_w = 0,9139, ρ = 0,9273, Bảng 5.2; KHUYẾN NGHỊ hai thành viên tự kiểm tra/chỉnh tay lại file human_ratings.csv nếu cần rồi chạy lại scripts/evaluate_dataset.py để bảo đảm 100% là điểm hai bạn tự chốt)
+Đo hai mặt của hệ thống:
+Trích xuất: độ chính xác theo trường và precision/recall của kỹ năng trên tối thiểu khoảng 50 CV. (ĐÃ THỰC HIỆN — đo trên toàn bộ 80 CV > 50 CV: chính xác 6 trường = 100%, kỹ năng Precision = Recall = F1 = 1,000 với 427 TP, phân tách VI/EN/BI & TXT/DOCX/PDF tại Bảng 5.4)
+Xếp hạng: tương quan Spearman/Kendall với điểm do người chấm, nDCG@5 cho từng JD. (ĐÃ THỰC HIỆN — tính đủ Spearman, Kendall, nDCG@5, P@5 cho từng JD01–JD04 và Macro-Average tại Bảng 5.6)
+Thêm baseline: TF-IDF cosine toàn văn, SBERT đa ngôn ngữ (cosine CV–JD) và so khớp từ khóa thuần, chạy trên cùng tập dữ liệu. Đây là bằng chứng cần có cho các khoảng trống mà nhóm đã nêu. (ĐÃ THỰC HIỆN — cài đặt trong app/application/baselines.py và chạy đủ cả 3 baseline gồm Từ khóa thuần, TF-IDF toàn văn, SBERT đa ngôn ngữ paraphrase-multilingual-MiniLM-L12-v2 trên cùng 80 CV, Bảng 5.6 & Hình 5.1)
+Ablation và độ nhạy:
+Bỏ lần lượt tầng ngữ nghĩa, ghép cặp một-một, đối chiếu nhiệm vụ, tái phân bổ trọng số động. (ĐÃ THỰC HIỆN — chạy đủ 5 cấu hình ablation trong Bảng 5.8 + 2 kịch bản stress test có kiểm soát tại Bảng 5.9 để đo rõ tác động của trọng số động -13,71 điểm, tầng ngữ nghĩa -21,25 điểm và ghép cặp 1-1 +9,50 điểm lạm phát)
+Thử thay đổi bộ trọng số 40/35/15/10 để xem thứ hạng có ổn định không. (ĐÃ THỰC HIỆN — thử 6 bộ trọng số tại Bảng 5.10 & Hình 5.2, độ ổn định thứ hạng ρ ∈ [0,9841; 0,9982], trùng Top-5 từ 95%–100%)
+Đánh giá tính giải thích: lấy khoảng 30 câu bằng chứng do hệ thống đưa ra cho người kiểm tra xem câu đó có thật sự chứng minh nhiệm vụ tương ứng không. Báo cáo tỷ lệ bằng chứng đúng. (ĐÃ THỰC HIỆN — xuất 32 cặp nhiệm vụ – bằng chứng cân bằng 4 JD & VI/EN/BI tại evaluation_results/evidence_audit_32.csv, tỷ lệ đúng 30/32 = 93,75%, Bảng 5.11; hai bạn nên mở file CSV rà soát xác nhận lại cột human_verdict_correct trước khi nộp)

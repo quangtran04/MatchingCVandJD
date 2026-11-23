@@ -995,3 +995,631 @@ $("#go-to-match")?.addEventListener("click", () => {
 });
 
 syncPipeline();
+
+
+/* =========================================================================
+   MODE SWITCHING & MULTI-CV BATCH RANKING (1 JD vs N CVs)
+   ========================================================================= */
+let activeMode = "single";
+let batchCandidates = []; // [{id, filename, language, cv_text}]
+let lastBatchResponse = null;
+let activeLangFilter = "all";
+let viewingBatchDetail = false;
+
+function setMode(mode) {
+  activeMode = mode;
+  viewingBatchDetail = false;
+  $("#batch-detail-banner")?.classList.add("hidden");
+  $("#back-to-extraction")?.classList.remove("hidden");
+  document.querySelectorAll(".mode-tab").forEach((tab) => {
+    const isActive = tab.dataset.mode === mode;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+
+  $("#single-mode-container")?.classList.toggle("hidden", mode !== "single");
+  $("#batch-mode-container")?.classList.toggle("hidden", mode !== "batch");
+
+  if (mode === "batch") {
+    $("#match-result")?.classList.add("hidden");
+  } else {
+    // Restore single mode stage cleanly
+    if (lastMatchReport) showStage(3);
+    else if (extractedProfiles) showStage(2);
+    else showStage(1);
+  }
+}
+
+document.querySelectorAll(".mode-tab").forEach((tab) => {
+  tab.addEventListener("click", () => setMode(tab.dataset.mode));
+});
+
+function detectLangFromFilename(name) {
+  const m = String(name || "").match(/_(vi|en|bi)\./i);
+  return m ? m[1].toLowerCase() : "";
+}
+
+function updateBatchReadyState() {
+  const jdVal = $("#batch-jd-text")?.value.trim() || "";
+  const jdCount = $("#batch-jd-count");
+  if (jdCount) jdCount.textContent = `${jdVal.length.toLocaleString("vi-VN")} ký tự`;
+
+  const badge = $("#batch-cv-badge");
+  if (badge) badge.textContent = `${batchCandidates.length} CV`;
+
+  const clearBtn = $("#clear-batch-cvs-btn");
+  if (clearBtn) clearBtn.disabled = batchCandidates.length === 0;
+
+  const runBtn = $("#run-batch-rank-btn");
+  if (runBtn) runBtn.disabled = !(jdVal.length > 0 && batchCandidates.length > 0);
+}
+
+function renderBatchCvList() {
+  const container = $("#batch-cv-list");
+  if (!container) return;
+  if (!batchCandidates.length) {
+    container.innerHTML =
+      '<p class="batch-empty-hint">Chưa có hồ sơ ứng viên nào. Hãy chọn nhiều tệp CV hoặc bấm chọn một bộ dữ liệu mẫu ở thanh phía trên.</p>';
+    updateBatchReadyState();
+    return;
+  }
+  container.innerHTML = batchCandidates
+    .map(
+      (cand, idx) => `<div class="batch-cv-item">
+        <div class="batch-cv-meta">
+          <span class="entry-index">${String(idx + 1).padStart(2, "0")}</span>
+          ${cand.language ? `<span class="lang-pill lang-${escapeHtml(cand.language)}">${escapeHtml(cand.language)}</span>` : ""}
+          <strong title="${escapeHtml(cand.filename)}">${escapeHtml(cand.filename)}</strong>
+          <small>${cand.cv_text.length.toLocaleString("vi-VN")} ký tự</small>
+        </div>
+        <button type="button" class="remove-cv-btn" data-remove-cv="${escapeHtml(cand.id)}" aria-label="Xóa CV">×</button>
+      </div>`
+    )
+    .join("");
+
+  container.querySelectorAll("[data-remove-cv]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-remove-cv");
+      batchCandidates = batchCandidates.filter((c) => c.id !== id);
+      renderBatchCvList();
+    });
+  });
+  updateBatchReadyState();
+}
+
+async function extractTextForFile(file) {
+  if (file.size > maxFileSize) {
+    throw new Error(`${file.name}: vượt quá 10MB`);
+  }
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/extract-text", { method: "POST", body: formData });
+  const body = await res.json();
+  if (!res.ok) throw new Error(`${file.name}: ${body.detail?.message || "lỗi đọc tệp"}`);
+  return body.text || "";
+}
+
+async function handleBatchJdFile(file) {
+  if (!file) return;
+  const msg = $("#batch-jd-file-name");
+  if (msg) {
+    msg.style.color = "";
+    msg.textContent = `◌ Đang trích xuất JD: ${file.name}`;
+  }
+  try {
+    const text = await extractTextForFile(file);
+    const ta = $("#batch-jd-text");
+    if (ta) ta.value = text;
+    if (msg) msg.textContent = `✓ Đã nạp JD: ${file.name}`;
+  } catch (err) {
+    if (msg) {
+      msg.style.color = "#c85841";
+      msg.textContent = err instanceof Error ? err.message : "Lỗi đọc tệp JD.";
+    }
+  } finally {
+    updateBatchReadyState();
+  }
+}
+
+async function handleBatchCvFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const status = $("#batch-cv-status");
+  if (status) {
+    status.style.color = "";
+    status.textContent = `◌ Đang trích xuất ${files.length} tệp CV…`;
+  }
+  let okCount = 0;
+  const errors = [];
+  await Promise.all(
+    files.map(async (file, idx) => {
+      try {
+        const text = await extractTextForFile(file);
+        if (!text.trim()) {
+          errors.push(`${file.name}: rỗng`);
+          return;
+        }
+        batchCandidates.push({
+          id: `up-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+          filename: file.name,
+          language: detectLangFromFilename(file.name),
+          cv_text: text,
+        });
+        okCount += 1;
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : file.name);
+      }
+    })
+  );
+  if (status) {
+    status.style.color = errors.length && !okCount ? "#c85841" : "";
+    status.textContent = errors.length
+      ? `✓ Đã nạp ${okCount}/${files.length} CV (${errors.length} lỗi: ${errors[0]})`
+      : `✓ Đã nạp thành công ${okCount} tệp CV`;
+  }
+  renderBatchCvList();
+}
+
+// Wire Batch JD upload zone
+const batchJdZone = $("#batch-jd-dropzone");
+const batchJdInput = $("#batch-jd-file");
+if (batchJdZone && batchJdInput) {
+  batchJdZone.addEventListener("click", (e) => {
+    if (e.target !== batchJdInput) batchJdInput.click();
+  });
+  batchJdInput.addEventListener("click", (e) => e.stopPropagation());
+  batchJdInput.addEventListener("change", () => {
+    if (batchJdInput.files?.[0]) handleBatchJdFile(batchJdInput.files[0]);
+  });
+  ["dragenter", "dragover"].forEach((ev) =>
+    batchJdZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      batchJdZone.classList.add("dragging");
+    })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    batchJdZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      batchJdZone.classList.remove("dragging");
+    })
+  );
+  batchJdZone.addEventListener("drop", (e) => {
+    if (e.dataTransfer?.files?.[0]) handleBatchJdFile(e.dataTransfer.files[0]);
+  });
+}
+$("#batch-jd-text")?.addEventListener("input", updateBatchReadyState);
+
+// Wire Batch Multi-CV upload zone
+const batchCvZone = $("#batch-cv-dropzone");
+const batchCvInput = $("#batch-cv-files");
+if (batchCvZone && batchCvInput) {
+  batchCvZone.addEventListener("click", (e) => {
+    if (e.target !== batchCvInput) batchCvInput.click();
+  });
+  batchCvInput.addEventListener("click", (e) => e.stopPropagation());
+  batchCvInput.addEventListener("change", () => {
+    if (batchCvInput.files?.length) {
+      handleBatchCvFiles(batchCvInput.files);
+      batchCvInput.value = "";
+    }
+  });
+  ["dragenter", "dragover"].forEach((ev) =>
+    batchCvZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      batchCvZone.classList.add("dragging");
+    })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    batchCvZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      batchCvZone.classList.remove("dragging");
+    })
+  );
+  batchCvZone.addEventListener("drop", (e) => {
+    if (e.dataTransfer?.files?.length) handleBatchCvFiles(e.dataTransfer.files);
+  });
+}
+
+// Manual CV addition & clear all
+$("#toggle-manual-cv-btn")?.addEventListener("click", () => {
+  $("#manual-cv-box")?.classList.toggle("hidden");
+});
+$("#cancel-manual-cv-btn")?.addEventListener("click", () => {
+  $("#manual-cv-box")?.classList.add("hidden");
+});
+$("#add-manual-cv-btn")?.addEventListener("click", () => {
+  const name = $("#manual-cv-name")?.value.trim() || `CV_nhap_tay_${batchCandidates.length + 1}.txt`;
+  const text = $("#manual-cv-text")?.value.trim() || "";
+  if (!text) {
+    window.alert("Vui lòng dán nội dung CV trước khi thêm.");
+    return;
+  }
+  batchCandidates.push({
+    id: `man-${Date.now()}`,
+    filename: name,
+    language: detectLangFromFilename(name),
+    cv_text: text,
+  });
+  if ($("#manual-cv-name")) $("#manual-cv-name").value = "";
+  if ($("#manual-cv-text")) $("#manual-cv-text").value = "";
+  $("#manual-cv-box")?.classList.add("hidden");
+  renderBatchCvList();
+});
+$("#clear-batch-cvs-btn")?.addEventListener("click", () => {
+  batchCandidates = [];
+  if ($("#batch-cv-status")) $("#batch-cv-status").textContent = "";
+  renderBatchCvList();
+});
+
+// Weight preset buttons & summary update
+function readBatchConfig() {
+  const wJob = Number($("#w-job")?.value ?? 40);
+  const wSkill = Number($("#w-skill")?.value ?? 35);
+  const wExp = Number($("#w-exp")?.value ?? 15);
+  const wEdu = Number($("#w-edu")?.value ?? 10);
+  return {
+    config: {
+      weights: {
+        job_fit: Math.max(0, wJob),
+        skill_match: Math.max(0, wSkill),
+        experience_match: Math.max(0, wExp),
+        education_match: Math.max(0, wEdu),
+      },
+      enable_semantic: Boolean($("#cfg-semantic")?.checked ?? true),
+      enable_one_to_one: Boolean($("#cfg-one-to-one")?.checked ?? true),
+      enable_job_fit: Boolean($("#cfg-job-fit")?.checked ?? true),
+      enable_dynamic_weights: Boolean($("#cfg-dynamic")?.checked ?? true),
+      enable_project_bonus: Boolean($("#cfg-bonus")?.checked ?? true),
+    },
+    include_baselines: Boolean($("#cfg-baselines")?.checked ?? true),
+    include_sbert: Boolean($("#cfg-sbert")?.checked ?? false),
+  };
+}
+
+function syncConfigSummary() {
+  const { config, include_baselines, include_sbert } = readBatchConfig();
+  const w = config.weights;
+  const enabledCount = [
+    config.enable_semantic,
+    config.enable_one_to_one,
+    config.enable_job_fit,
+    config.enable_dynamic_weights,
+    config.enable_project_bonus,
+  ].filter(Boolean).length;
+  const baseLabel = include_baselines
+    ? include_sbert
+      ? "Kèm 3 Baseline (KW + TF-IDF + SBERT)"
+      : "Kèm 2 Baseline (KW + TF-IDF)"
+    : "Không chạy Baseline";
+  const node = $("#config-summary-text");
+  if (node) {
+    node.textContent = `Trọng số: ${w.job_fit}% Mô tả · ${w.skill_match}% Kỹ năng · ${w.experience_match}% Kinh nghiệm · ${w.education_match}% Học vấn · ${enabledCount}/5 mô-đun bật · ${baseLabel}`;
+  }
+}
+
+document.querySelectorAll(".preset-pill[data-weights]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const [j, s, ex, ed] = btn.dataset.weights.split(",");
+    if ($("#w-job")) $("#w-job").value = j;
+    if ($("#w-skill")) $("#w-skill").value = s;
+    if ($("#w-exp")) $("#w-exp").value = ex;
+    if ($("#w-edu")) $("#w-edu").value = ed;
+    syncConfigSummary();
+  });
+});
+["w-job", "w-skill", "w-exp", "w-edu", "cfg-semantic", "cfg-one-to-one", "cfg-job-fit", "cfg-dynamic", "cfg-bonus", "cfg-baselines", "cfg-sbert"].forEach(
+  (id) => $(`#${id}`)?.addEventListener("change", syncConfigSummary)
+);
+
+// Load available dataset presets from CV_JD_Dataset
+async function initDatasetPresets() {
+  try {
+    const res = await fetch("/api/dataset-presets");
+    if (!res.ok) return;
+    const data = await res.json();
+    const presets = data.presets || [];
+    if (!presets.length) return;
+    const bar = $("#dataset-preset-bar");
+    const chips = $("#dataset-preset-chips");
+    if (!bar || !chips) return;
+    bar.classList.remove("hidden");
+    chips.innerHTML = presets
+      .map(
+        (p) => `<button type="button" class="preset-load-btn" data-preset-id="${escapeHtml(p.id)}">
+          ${escapeHtml(p.label)} <span>${p.cv_count} CV</span>
+        </button>`
+      )
+      .join("");
+    chips.querySelectorAll("[data-preset-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const presetId = btn.getAttribute("data-preset-id");
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = "◌ Đang nạp…";
+        try {
+          const r = await fetch(`/api/dataset-presets/${encodeURIComponent(presetId)}`, { method: "POST" });
+          const body = await r.json();
+          if (!r.ok) throw new Error(body.detail?.message || "Không thể nạp bộ dữ liệu mẫu.");
+          if ($("#batch-jd-text")) $("#batch-jd-text").value = body.jd_text || "";
+          if ($("#batch-jd-file-name")) $("#batch-jd-file-name").textContent = `✓ Bộ mẫu: ${body.jd_filename}`;
+          batchCandidates = body.candidates || [];
+          if ($("#batch-cv-status")) {
+            $("#batch-cv-status").textContent = `✓ Đã nạp ${batchCandidates.length} CV từ ${presetId}`;
+          }
+          renderBatchCvList();
+          // Immediately show input stage if results were open
+          $("#batch-input-stage")?.classList.remove("hidden");
+          $("#batch-results")?.classList.add("hidden");
+          $("#match-result")?.classList.add("hidden");
+        } catch (err) {
+          window.alert(err instanceof Error ? err.message : "Lỗi nạp dữ liệu mẫu.");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      });
+    });
+  } catch {
+    // Ignore if presets endpoint unavailable
+  }
+}
+
+function scoreTone(score) {
+  if (score == null) return "";
+  if (score >= 70) return "high";
+  if (score >= 45) return "mid";
+  return "low";
+}
+
+function renderBatchTable() {
+  if (!lastBatchResponse) return;
+  const tbody = $("#batch-ranking-body");
+  if (!tbody) return;
+
+  const query = ($("#batch-search-input")?.value || "").trim().toLowerCase();
+  const sortKey = $("#batch-sort-select")?.value || "overall";
+  const showSbert = Boolean(lastBatchResponse.sbert_included);
+  const thBase = $("#th-baselines");
+  if (thBase) {
+    thBase.textContent = showSbert ? "Baseline (KW / TF-IDF / SBERT)" : "Baseline (KW / TF-IDF)";
+  }
+
+  let rows = [...(lastBatchResponse.rankings || [])];
+  if (activeLangFilter !== "all") {
+    rows = rows.filter((r) => r.language === activeLangFilter);
+  }
+  if (query) {
+    rows = rows.filter(
+      (r) =>
+        r.candidate_name.toLowerCase().includes(query) ||
+        r.filename.toLowerCase().includes(query) ||
+        (r.missing_required_skills || []).some((s) => s.toLowerCase().includes(query))
+    );
+  }
+
+  const sortAccessor = {
+    overall: (r) => r.overall_score ?? -1,
+    skill: (r) => r.skill_match ?? -1,
+    job_fit: (r) => r.job_fit ?? -1,
+    experience: (r) => r.experience_match ?? -1,
+    baseline_keyword: (r) => r.baseline_keyword ?? -1,
+    baseline_tfidf: (r) => r.baseline_tfidf ?? -1,
+    baseline_sbert: (r) => r.baseline_sbert ?? -1,
+  }[sortKey];
+  if (sortAccessor) {
+    rows.sort((a, b) => sortAccessor(b) - sortAccessor(a));
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#5d6e69;padding:28px;">Không có ứng viên nào khớp bộ lọc hiện tại.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows
+    .map((row) => {
+      const tone = scoreTone(row.overall_score);
+      const rankClass = row.rank <= 3 ? `rank-${row.rank}` : "";
+      const missing = row.missing_required_skills || [];
+      const missingHtml = missing.length
+        ? `<span class="missing-pill" title="${escapeHtml(missing.join(", "))}">${missing.length}: ${escapeHtml(missing.join(", "))}</span>`
+        : `<span class="missing-pill none">Đủ bắt buộc</span>`;
+      const baseText =
+        row.baseline_keyword != null
+          ? showSbert && row.baseline_sbert != null
+            ? `${row.baseline_keyword.toFixed(1)} / ${row.baseline_tfidf.toFixed(1)} / ${row.baseline_sbert.toFixed(1)}`
+            : `${row.baseline_keyword.toFixed(1)} / ${row.baseline_tfidf.toFixed(1)}`
+          : "—";
+      return `<tr>
+        <td><span class="rank-badge ${rankClass}">#${row.rank}</span></td>
+        <td class="cand-cell">
+          <strong>${escapeHtml(row.candidate_name)}</strong>
+          <div class="cand-cell-sub">
+            ${row.language ? `<span class="lang-pill lang-${escapeHtml(row.language)}">${escapeHtml(row.language)}</span>` : ""}
+            <span>${escapeHtml(row.filename)}</span>
+          </div>
+        </td>
+        <td class="score-bar-cell ${tone}">
+          <strong>${formatScore(row.overall_score)}</strong>
+          <div class="mini-bar"><i style="width:${Math.min(100, row.overall_score || 0)}%"></i></div>
+        </td>
+        <td class="mono-num">${formatScore(row.job_fit)}</td>
+        <td class="mono-num">${formatScore(row.skill_match)}</td>
+        <td class="mono-num">${formatScore(row.experience_match)}</td>
+        <td class="mono-num">${formatScore(row.education_match)}</td>
+        <td><span class="bonus-pill">+${(row.project_bonus_applied_points || 0).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}</span></td>
+        <td class="mono-num">${baseText}</td>
+        <td>${missingHtml}</td>
+        <td><button type="button" class="inspect-btn" data-inspect-id="${escapeHtml(row.id)}">Xem chi tiết →</button></td>
+      </tr>`;
+    })
+    .join("");
+
+  tbody.querySelectorAll("[data-inspect-id]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-inspect-id");
+      const item = (lastBatchResponse.rankings || []).find((r) => r.id === id);
+      if (!item) return;
+      viewingBatchDetail = true;
+      renderMatch(item.report);
+      $("#batch-mode-container")?.classList.add("hidden");
+      $("#batch-detail-banner")?.classList.remove("hidden");
+      if ($("#batch-detail-candidate-title")) {
+        $("#batch-detail-candidate-title").textContent = `Hạng #${item.rank} — ${item.candidate_name} (${item.filename}) · Tổng điểm ${formatScore(item.overall_score)}`;
+      }
+      $("#back-to-extraction")?.classList.add("hidden");
+      $("#match-result")?.classList.remove("hidden");
+      $("#match-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function renderBatchDashboard(data) {
+  lastBatchResponse = data;
+  const stats = data.summary_stats || {};
+  const jdTitle = data.jd_profile?.job_info?.title || "Vị trí tuyển dụng";
+  const topCand = data.rankings?.[0];
+  if ($("#batch-result-title")) {
+    $("#batch-result-title").textContent = `Xếp hạng ${data.total_candidates} ứng viên — ${jdTitle}`;
+  }
+  const statsGrid = $("#batch-stats-grid");
+  if (statsGrid) {
+    statsGrid.innerHTML = `
+      <article class="batch-stat-card highlight">
+        <span>ỨNG VIÊN HẠNG #1</span>
+        <strong>${formatScore(stats.top_score)}</strong>
+        <small>${escapeHtml(topCand ? topCand.candidate_name : "—")}</small>
+      </article>
+      <article class="batch-stat-card">
+        <span>TỔNG SỐ HỒ SƠ ĐÃ CHẤM</span>
+        <strong>${data.total_candidates}</strong>
+        <small>Taxonomy v${escapeHtml(data.taxonomy_version || "1.3.0")}</small>
+      </article>
+      <article class="batch-stat-card">
+        <span>ĐIỂM TRUNG BÌNH / TRUNG VỊ</span>
+        <strong>${formatScore(stats.avg_score)}</strong>
+        <small>Trung vị: ${formatScore(stats.median_score)}</small>
+      </article>
+      <article class="batch-stat-card">
+        <span>ỨNG VIÊN ĐẠT ≥ 70%</span>
+        <strong>${stats.qualified_count ?? 0} / ${data.total_candidates}</strong>
+        <small>Gợi ý ưu tiên mời phỏng vấn</small>
+      </article>
+    `;
+  }
+  renderBatchTable();
+  $("#batch-input-stage")?.classList.add("hidden");
+  $("#batch-results")?.classList.remove("hidden");
+  $("#batch-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("#run-batch-rank-btn")?.addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  const jdText = $("#batch-jd-text")?.value.trim() || "";
+  if (!jdText || !batchCandidates.length) return;
+  const payload = {
+    jd_text: jdText,
+    candidates: batchCandidates,
+    ...readBatchConfig(),
+  };
+  button.classList.add("loading");
+  button.disabled = true;
+  button.innerHTML = `<span>◌</span> Đang xếp hạng ${batchCandidates.length} ứng viên…`;
+  try {
+    const res = await fetch("/api/match-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.detail?.message || "Không thể chạy xếp hạng hàng loạt.");
+    renderBatchDashboard(body);
+  } catch (err) {
+    window.alert(err instanceof Error ? err.message : "Đã xảy ra lỗi.");
+  } finally {
+    button.classList.remove("loading");
+    button.innerHTML = "<span>✦</span> So sánh &amp; Xếp hạng ứng viên <b>→</b>";
+    updateBatchReadyState();
+  }
+});
+
+$("#batch-edit-inputs-btn")?.addEventListener("click", () => {
+  $("#batch-results")?.classList.add("hidden");
+  $("#batch-input-stage")?.classList.remove("hidden");
+});
+
+$("#back-to-leaderboard-btn")?.addEventListener("click", () => {
+  viewingBatchDetail = false;
+  $("#match-result")?.classList.add("hidden");
+  $("#batch-detail-banner")?.classList.add("hidden");
+  $("#back-to-extraction")?.classList.remove("hidden");
+  $("#batch-mode-container")?.classList.remove("hidden");
+  $("#batch-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("#batch-search-input")?.addEventListener("input", renderBatchTable);
+$("#batch-sort-select")?.addEventListener("change", renderBatchTable);
+document.querySelectorAll("#lang-filter-pills .filter-pill").forEach((pill) => {
+  pill.addEventListener("click", () => {
+    activeLangFilter = pill.dataset.lang || "all";
+    document.querySelectorAll("#lang-filter-pills .filter-pill").forEach((p) => {
+      p.classList.toggle("active", p === pill);
+    });
+    renderBatchTable();
+  });
+});
+
+$("#export-csv-btn")?.addEventListener("click", () => {
+  if (!lastBatchResponse?.rankings?.length) return;
+  const headers = [
+    "Hang",
+    "Ung_vien",
+    "Tep_CV",
+    "Ngon_ngu",
+    "Tong_diem",
+    "Diem_nen",
+    "Thuong_du_an",
+    "Mo_ta_CV",
+    "Ky_nang",
+    "Kinh_nghiem",
+    "Hoc_van",
+    "Baseline_Keyword",
+    "Baseline_TFIDF",
+    "Baseline_SBERT",
+    "Ky_nang_bat_buoc_thieu",
+  ];
+  const csvEsc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [
+    headers.join(","),
+    ...lastBatchResponse.rankings.map((r) =>
+      [
+        r.rank,
+        r.candidate_name,
+        r.filename,
+        r.language,
+        r.overall_score ?? "",
+        r.base_score ?? "",
+        r.project_bonus_applied_points ?? "",
+        r.job_fit ?? "",
+        r.skill_match ?? "",
+        r.experience_match ?? "",
+        r.education_match ?? "",
+        r.baseline_keyword ?? "",
+        r.baseline_tfidf ?? "",
+        r.baseline_sbert ?? "",
+        (r.missing_required_skills || []).join("; "),
+      ]
+        .map(csvEsc)
+        .join(",")
+    ),
+  ];
+  const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "bang_xep_hang_ung_vien.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+syncConfigSummary();
+initDatasetPresets();

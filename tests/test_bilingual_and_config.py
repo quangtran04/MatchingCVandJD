@@ -115,3 +115,82 @@ def test_keyword_and_tfidf_baselines_rank_relevant_cv_higher() -> None:
     assert score_keyword_baseline(strong_cv, jd) > score_keyword_baseline(weak_cv, jd)
     tfidf_scores = score_tfidf_fulltext_batch(jd_text, [strong_cv, weak_cv])
     assert tfidf_scores[0] > tfidf_scores[1]
+
+
+def test_batch_match_endpoint_ranks_candidates_with_baselines_and_config() -> None:
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    client = TestClient(app)
+    jd_text = """JOB DESCRIPTION: BACKEND DEVELOPER (JAVA)
+RESPONSIBILITIES
+- Design and build RESTful APIs with Java and Spring Boot
+REQUIREMENTS
+- At least 2 years of experience
+- Proficient in: Java, Spring Boot, MySQL, Docker, Git
+- Bachelor's degree in a relevant field
+"""
+    strong_cv = """TRAN VAN A
+EXPERIENCE
+Backend Developer | Tech Corp
+01/2023 - Present
+- Designed and built RESTful APIs with Java, Spring Boot, MySQL, and Docker.
+EDUCATION
+B.Eng. in Information Technology, UTC (2018 - 2022)
+SKILLS
+Java, Spring Boot, MySQL, REST API, Docker, Git
+"""
+    weak_cv = """LE VAN B
+EXPERIENCE
+Web Admin | Small Shop
+01/2025 - Present
+- Maintained WordPress sites with PHP.
+EDUCATION
+B.Eng. in Information Technology, UTC (2020 - 2024)
+SKILLS
+WordPress, PHP
+"""
+    res = client.post(
+        "/api/match-batch",
+        json={
+            "jd_text": jd_text,
+            "candidates": [
+                {"id": "c-weak", "filename": "weak_vi.txt", "cv_text": weak_cv},
+                {"id": "c-strong", "filename": "strong_en.txt", "cv_text": strong_cv},
+            ],
+            "config": {
+                "weights": {"job_fit": 40, "skill_match": 35, "experience_match": 15, "education_match": 10},
+                "enable_semantic": True,
+                "enable_one_to_one": True,
+                "enable_job_fit": True,
+                "enable_dynamic_weights": True,
+                "enable_project_bonus": True,
+            },
+            "include_baselines": True,
+            "include_sbert": False,
+        },
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["total_candidates"] == 2
+    assert body["rankings"][0]["id"] == "c-strong"
+    assert body["rankings"][0]["rank"] == 1
+    assert body["rankings"][1]["id"] == "c-weak"
+    assert body["rankings"][1]["rank"] == 2
+    assert body["rankings"][0]["overall_score"] > body["rankings"][1]["overall_score"]
+    assert body["rankings"][0]["baseline_keyword"] is not None
+    assert body["rankings"][0]["baseline_tfidf"] is not None
+
+
+def test_dataset_presets_endpoint_lists_cv_jd_dataset() -> None:
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    client = TestClient(app)
+    res = client.get("/api/dataset-presets")
+    assert res.status_code == 200
+    presets = res.json()["presets"]
+    assert len(presets) >= 4
+    assert any(p["id"] == "JD01_Backend_Developer" and p["cv_count"] == 20 for p in presets)
